@@ -22,6 +22,6 @@ public class MemberVO {
     private Date user_regdate;   // 가입일
     
     // 추가된 위도/경도
-    private Double store_lat;
-    private Double store_lon;
+    private Double user_lat;
+    private Double user_lon;
 }

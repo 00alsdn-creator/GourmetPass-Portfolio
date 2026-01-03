@@ -20,8 +20,8 @@
             user_zip, 
             user_addr1, 
             user_addr2, 
-            store_lat, 
-            store_lon
+            user_lat, 
+            user_lon
         ) VALUES (
             #{user_id}, 
             #{user_pw}, 
@@ -31,8 +31,8 @@
             #{user_zip, jdbcType=VARCHAR}, 
             #{user_addr1, jdbcType=VARCHAR}, 
             #{user_addr2, jdbcType=VARCHAR}, 
-            #{store_lat, jdbcType=NUMERIC}, 
-            #{store_lon, jdbcType=NUMERIC}
+            #{user_lat, jdbcType=NUMERIC}, 
+            #{user_lon, jdbcType=NUMERIC}
         )
     </insert>
     
@@ -40,30 +40,5 @@
 		SELECT COUNT(*) FROM MEMBERS 
 		WHERE user_id = #{user_id}
 	</select>
-	
-	<insert id="insertStore">
-        INSERT INTO STORE (
-            store_id,        user_id,         store_name, 
-            store_category, 
-            store_tel, 
-            store_zip, 
-            store_addr1, 
-            store_addr2, 
-            store_lat, 
-            store_lon, 
-            store_cnt,       res_unit         ) VALUES (
-            SEQ_STORE.NEXTVAL, #{user_id}, 
-            #{store_name}, 
-            #{store_category}, 
-            #{store_tel, jdbcType=VARCHAR}, 
-            #{store_zip, jdbcType=VARCHAR}, 
-            #{store_addr1, jdbcType=VARCHAR}, 
-            #{store_addr2, jdbcType=VARCHAR}, 
-            #{store_lat, jdbcType=NUMERIC}, 
-            #{store_lon, jdbcType=NUMERIC}, 
-            0, 
-            30
-        )
-    </insert>
 
 </mapper>

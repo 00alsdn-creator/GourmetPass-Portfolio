@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,8 +6,8 @@
 <title>회원가입</title>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <%-- 카카오 지도 API --%>
-<script type="text/javascript"
-	src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b907f9de332704eb4d28aab654997e4d&libraries=services"></script>
+<script type="text/javascript" 
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services"></script>
 <script
 	src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
@@ -33,8 +32,8 @@
 	<form action="${pageContext.request.contextPath}/joinProcess.do"
 		method="post" id="joinForm">
 		<%-- 좌표용 히든 필드 --%>
-		<input type="hidden" name="store_lat" id="store_lat" value="0.0">
-		<input type="hidden" name="store_lon" id="store_lon" value="0.0">
+		<input type="hidden" name="user_lat" id="user_lat" value="0.0">
+		<input type="hidden" name="user_lon" id="user_lon" value="0.0">
 
 		<table border="1" align="center" cellpadding="5">
 			<tr>
@@ -191,8 +190,8 @@
                         var result = results[0];
                         
                         // 히든 필드에 값 넣기 (DB 전송용)
-                        document.getElementById('store_lat').value = result.y;
-                        document.getElementById('store_lon').value = result.x;
+                        document.getElementById('user_lat').value = result.y;
+                        document.getElementById('user_lon').value = result.x;
                         
                         // [수정된 부분] 화면에 실제 위도/경도 숫자를 보여주는 코드
                         var msg = "📍 좌표 추출 완료!<br>" 
@@ -210,12 +209,11 @@
         }).open();
     }
  // 6. 전화번호 자동 하이픈 정규식 함수
-    const autoHyphen = (target) => {
-        target.value = target.value
-            .replace(/[^0-9]/g, '') // 숫자가 아닌 문자는 즉시 삭제
-            // 02-123-4567 또는 010-1234-5678 패턴에 맞춰 하이픈 삽입
-            .replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
-    }
+const autoHyphen = (target) => {
+    target.value = target.value
+        .replace(/[^0-9]/g, '')
+        .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "");
+}
     
 </script>
 

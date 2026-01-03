@@ -6,7 +6,7 @@
 <title>점주 회원가입 - 2단계</title>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <%-- 카카오 지도 API 및 주소 API 스크립트 --%>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b907f9de332704eb4d28aab654997e4d&libraries=services"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakao.js.key}&libraries=services"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <style>

@@ -22,5 +22,8 @@
             </td>
         </tr>
     </table>
+    <script>
+    console.log("카카오키: " + "${kakao.js.key}");
+</script>
 </body>
 </html>
