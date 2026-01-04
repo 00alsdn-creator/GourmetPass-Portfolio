@@ -5,69 +5,85 @@
 
 <mapper namespace="com.uhi.gourmet.store.StoreMapper">
 
-	<insert id="insertStore" parameterType="com.uhi.gourmet.store.StoreVO">
+	<insert id="insertStore"
+		parameterType="com.uhi.gourmet.store.StoreVO">
 		INSERT INTO STORE (
-			store_id, 
-			user_id, 
-			store_name, 
-			store_tel, 
-			store_zip, 
-			store_addr1, 
-			store_addr2, 
-			store_lat, 
-			store_lon, 
-			store_category, 
-			store_desc,     store_time,
-			res_unit,
-			store_img,
-			store_cnt
-		) VALUES (
-			SEQ_STORE.NEXTVAL, 
-			#{user_id}, 
-			#{store_name}, 
-			#{store_tel}, 
-			#{store_zip}, 
-			#{store_addr1}, 
-			#{store_addr2}, 
-			#{store_lat}, 
-			#{store_lon}, 
-			#{store_category}, -- 카테고리 (JSP에 추가 필요하거나 추후 업데이트)
-			#{store_info},     -- VO 변수명 (JSP name과 일치)
-			#{store_time},
-			#{res_unit},
-			#{store_img},
-			0                  -- 초기 조회수는 0
+		store_id,
+		user_id,
+		store_name,
+		store_tel,
+		store_zip,
+		store_addr1,
+		store_addr2,
+		store_lat,
+		store_lon,
+		store_category,
+		store_desc,
+		store_time,
+		res_unit,
+		store_img,
+		store_cnt
+		)
+		VALUES (
+		SEQ_STORE.NEXTVAL,
+		#{user_id},
+		#{store_name},
+		#{store_tel},
+		#{store_zip},
+		#{store_addr1},
+		#{store_addr2},
+		#{store_lat},
+		#{store_lon},
+		#{store_category},
+		#{store_desc},
+		#{store_time},
+		#{res_unit},
+		#{store_img},
+		0
 		)
 	</insert>
 
-	<select id="selectPopularStore" resultType="com.uhi.gourmet.store.StoreVO">
-		<![CDATA[
+	<select id="selectPopularStore"
+		resultType="com.uhi.gourmet.store.StoreVO">
 		SELECT * FROM (
-			SELECT 
-				store_id, 
-				store_name, 
-				store_category, 
-				store_img, 
-				store_addr1, 
-				store_cnt,
-				store_lat,
-				store_lon
-			FROM STORE 
-			ORDER BY store_cnt DESC
-		)
-		WHERE ROWNUM <= 4
-		]]>
-	</select>
-
-	<select id="selectStoreByCategory" parameterType="String" resultType="com.uhi.gourmet.store.StoreVO">
 		SELECT * FROM STORE
-		WHERE store_category = #{store_category}
 		ORDER BY store_cnt DESC
+		)
+		WHERE ROWNUM &lt;= 6
 	</select>
 
-	<select id="selectStoreDetail" parameterType="int" resultType="com.uhi.gourmet.store.StoreVO">
+	<select id="getListStore"
+		resultType="com.uhi.gourmet.store.StoreVO">
+		SELECT * FROM (
+		SELECT * FROM STORE
+		WHERE 1=1
+		<if test="category != null and category != ''">
+			AND store_category = #{category}
+		</if>
+		<if test="region != null and region != ''">
+			AND store_addr1 LIKE '%' || #{region} || '%'
+		</if>
+		ORDER BY store_cnt DESC
+		)
+	</select>
+
+	<select id="getStoreDetail" parameterType="int"
+		resultType="com.uhi.gourmet.store.StoreVO">
 		SELECT * FROM STORE
 		WHERE store_id = #{store_id}
 	</select>
+
+	<select id="getMenuList" parameterType="int"
+		resultType="com.uhi.gourmet.store.MenuVO">
+		SELECT * FROM MENU
+		WHERE store_id = #{store_id}
+	</select>
+
+	<update id="updateViewCount" parameterType="int">
+		UPDATE STORE
+		SET
+		store_cnt = store_cnt + 1
+		WHERE store_id = #{store_id}
+	</update>
 
 </mapper>

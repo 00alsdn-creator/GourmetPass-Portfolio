@@ -1,4 +1,4 @@
-package com.uhi.gourmet.common; // 패키지 경로 통일
+package com.uhi.gourmet.common;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +16,17 @@ public class MainController {
     @Autowired
     private StoreMapper storeMapper;
 
-    // 루트 경로(/) 접속 시 메인 페이지 호출
+    // 홈페이지 접속 시 실행되는 메서드
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String mainPage(Model model) {
         
-        // [1] 인기 맛집 조회 (Store팀이 만든 Mapper 활용)
+        // [1] 인기 맛집 조회 (조회수가 높은 순서로 가져오기)
         List<StoreVO> storeList = storeMapper.selectPopularStore();
         
-        // [2] JSP로 전달
+        // [2] 화면(main.jsp)으로 데이터 전달
         model.addAttribute("storeList", storeList);
         
-        // [3] views/main.jsp 호출
+        // [3] views/main.jsp 파일을 보여줌
         return "main"; 
     }
 }
