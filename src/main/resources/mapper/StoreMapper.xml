@@ -53,9 +53,9 @@
         SELECT * FROM STORE WHERE store_id = #{store_id}
     </select>
 
-    <select id="getStoreByUserId" resultType="com.uhi.gourmet.store.StoreVO">
-        SELECT * FROM STORE WHERE user_id = #{user_id}
-    </select>
+    <select id="getStoreByUserId" parameterType="string" resultType="com.uhi.gourmet.store.StoreVO">
+    SELECT * FROM STORE WHERE user_id = #{user_id}
+	</select>
 
     <select id="getMenuList" parameterType="int" resultType="com.uhi.gourmet.store.MenuVO">
         SELECT * FROM MENU WHERE store_id = #{store_id}
