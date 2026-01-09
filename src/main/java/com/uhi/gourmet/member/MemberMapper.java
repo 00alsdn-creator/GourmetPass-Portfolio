@@ -17,7 +17,7 @@ public interface MemberMapper {
     // 4. 회원 상세 정보 조회
     MemberVO getMemberById(String user_id);
 
-    // 5. 회원 정보 수정
+    // 5. 회원 정보 수정(VO의 user_pw가 null이면 비밀번호는 수정하지 않음)
     void updateMember(MemberVO vo);
 
     // 6. 회원 탈퇴 (추가!)

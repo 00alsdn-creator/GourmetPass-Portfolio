@@ -37,92 +37,90 @@
 <body>
     <h2 align="center">일반 회원가입</h2>
 
-    <%-- 
-        [3] 전송 폼 (Form)
-        - action: "가입하기" 버튼 누르면 이 주소로 데이터 보냄
-        - method="post": 비밀번호 등 중요 정보 숨겨서 보냄
-        - id="joinForm": 자바스크립트에서 이 폼을 제어하려고 붙인 이름표
+	<%-- 
+        [수정 포인트] 
+        action 주소를 컨트롤러의 @PostMapping("/joinProcess")와 일치시킵니다.
+        ${pageContext.request.contextPath}/member/joinProcess 로 변경 
     --%>
-    <form action="${pageContext.request.contextPath}/member/signup/general" method="post" id="joinForm">
-        
-        <%-- 
+	<form action="${pageContext.request.contextPath}/member/joinProcess"
+		method="post" id="joinForm">
+
+		<%-- 
             [보안 핵심] CSRF 토큰
             - Spring Security를 쓰면 "POST 전송" 할 때 무조건 이 토큰을 같이 보내야 함.
             - 없으면 "403 Forbidden" 에러 뜨면서 가입 안 됨.
             - hidden: 화면엔 안 보이고 몰래 같이 보냄.
         --%>
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-        
-        <!-- [4] 숨겨진 좌표 데이터 
+		<input type="hidden" name="${_csrf.parameterName}"
+			value="${_csrf.token}" />
+
+		<!-- [4] 숨겨진 좌표 데이터 
              사용자는 주소만 검색하지만, 우리는 몰래 위도(lat)/경도(lon)를 계산해서 DB에 저장함 -->
-        <input type="hidden" name="user_lat" id="user_lat" value="0.0">
-        <input type="hidden" name="user_lon" id="user_lon" value="0.0">
+		<input type="hidden" name="user_lat" id="user_lat" value="0.0">
+		<input type="hidden" name="user_lon" id="user_lon" value="0.0">
 
-        <table border="1" align="center">
-            <tr>
-                <td>아이디</td>
-                <td>
-                    <input type="text" name="user_id" id="user_id" placeholder="아이디" required>
-                    <!-- type="button"을 안 쓰면 엔터 칠 때 전송(submit)되어 버리니 주의! -->
-                    <button type="button" id="btnIdCheck">중복확인</button>
-                    <!-- 결과 메시지(사용 가능/불가능) 띄울 빈 공간 -->
-                    <div id="idCheckMsg"></div>
-                </td>
-            </tr>
-            <tr>
-                <td>비밀번호</td>
-                <td><input type="password" name="user_pw" id="user_pw" placeholder="비밀번호" required></td>
-            </tr>
-            <tr>
-                <td>비밀번호 확인</td>
-                <td>
-                    <input type="password" id="user_pw_confirm" placeholder="비밀번호 재입력" required>
-                    <!-- 비번 일치 여부 메시지 공간 -->
-                    <div id="pwCheckMsg"></div>
-                </td>
-            </tr>
-            <tr>
-                <td>이름</td>
-                <td><input type="text" name="user_nm" required></td>
-            </tr>
-            <tr>
-                <td>이메일</td>
-                <td><input type="email" name="user_email"></td>
-            </tr>
-            <tr>
-                <td>전화번호</td>
-                <td>
-                   <!-- oninput="autoHyphen(this)": 키보드 칠 때마다 자동으로 하이픈(-) 넣어주는 함수 호출 -->
-                   <input type="text" name="user_tel" required placeholder="숫자만 입력하세요"
-                           maxlength="13" oninput="autoHyphen(this)">
-                </td>
-            </tr>
-            <tr>
-                <td>주소</td>
-                <td>
-                    <!-- readonly: 사용자가 직접 타이핑 못 하게 막음 (오타 방지) -->
-                    <input type="text" name="user_zip" id="user_zip" placeholder="우편번호" readonly>
-                    <button type="button" onclick="execDaumPostcode()">주소검색</button> <br>
-                    
-                    <input type="text" name="user_addr1" id="user_addr1" placeholder="기본주소" size="40" readonly><br>
-                    <input type="text" name="user_addr2" id="user_addr2" placeholder="상세주소 입력">
-                    
-                    <!-- 좌표 변환 결과 보여줄 공간 -->
-                    <div id="coordStatus" style="color: blue; font-size: 12px; margin-top: 5px;">
-                        주소를 검색하면 자동으로 위도/경도가 입력됩니다.
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" align="center">
-                    <input type="submit" value="가입하기">
-                    <input type="button" value="취소" onclick="location.href='${pageContext.request.contextPath}/'">
-                </td>
-            </tr>
-        </table>
-    </form>
+		<table border="1" align="center">
+			<tr>
+				<td>아이디</td>
+				<td><input type="text" name="user_id" id="user_id"
+					placeholder="아이디" required> <!-- type="button"을 안 쓰면 엔터 칠 때 전송(submit)되어 버리니 주의! -->
+					<button type="button" id="btnIdCheck">중복확인</button> <!-- 결과 메시지(사용 가능/불가능) 띄울 빈 공간 -->
+					<div id="idCheckMsg"></div></td>
+			</tr>
+			<tr>
+				<td>비밀번호</td>
+				<td><input type="password" name="user_pw" id="user_pw"
+					placeholder="비밀번호" required></td>
+			</tr>
+			<tr>
+				<td>비밀번호 확인</td>
+				<td><input type="password" id="user_pw_confirm"
+					placeholder="비밀번호 재입력" required> <!-- 비번 일치 여부 메시지 공간 -->
+					<div id="pwCheckMsg"></div></td>
+			</tr>
+			<tr>
+				<td>이름</td>
+				<td><input type="text" name="user_nm" required></td>
+			</tr>
+			<tr>
+				<td>이메일</td>
+				<td><input type="email" name="user_email"></td>
+			</tr>
+			<tr>
+				<td>전화번호</td>
+				<td>
+					<!-- oninput="autoHyphen(this)": 키보드 칠 때마다 자동으로 하이픈(-) 넣어주는 함수 호출 -->
+					<input type="text" name="user_tel" required placeholder="숫자만 입력하세요"
+					maxlength="13" oninput="autoHyphen(this)">
+				</td>
+			</tr>
+			<tr>
+				<td>주소</td>
+				<td>
+					<!-- readonly: 사용자가 직접 타이핑 못 하게 막음 (오타 방지) --> <input type="text"
+					name="user_zip" id="user_zip" placeholder="우편번호" readonly>
+					<button type="button" onclick="execDaumPostcode()">주소검색</button> <br>
 
-    <script>
+					<input type="text" name="user_addr1" id="user_addr1"
+					placeholder="기본주소" size="40" readonly><br> <input
+					type="text" name="user_addr2" id="user_addr2" placeholder="상세주소 입력">
+
+					<!-- 좌표 변환 결과 보여줄 공간 -->
+					<div id="coordStatus"
+						style="color: blue; font-size: 12px; margin-top: 5px;">주소를
+						검색하면 자동으로 위도/경도가 입력됩니다.</div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center"><input type="submit"
+					value="가입하기"> <input type="button" value="취소"
+					onclick="location.href='${pageContext.request.contextPath}/'">
+				</td>
+			</tr>
+		</table>
+	</form>
+
+	<script>
     // [5] 전역 변수: 최종 제출 전에 "검사 통과했나?" 기록해두는 깃발
     let isIdChecked = false; // 중복확인 했는지?
     let isPwMatched = false; // 비번 두 개가 똑같은지?
@@ -220,10 +218,43 @@
     // --- [기능 5] 전화번호 자동 하이픈 (-) ---
     // 숫자만 남기고 -> 010-1234-5678 형식으로 바꿔줌
     const autoHyphen = (target) => {
-        target.value = target.value
-            .replace(/[^0-9]/g, '')
-            .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "");
+    // 1. 숫자 이외의 문자 제거
+    let val = target.value.replace(/[^0-9]/g, "");
+    let str = "";
+
+    // 2. 서울 지역번호(02)인 경우
+    if (val.startsWith("02")) {
+        if (val.length < 3) {
+            str = val;
+        } else if (val.length < 6) {
+            // 02-123
+            str = val.substr(0, 2) + "-" + val.substr(2);
+        } else if (val.length < 10) {
+            // 02-123-4567 (9자리)
+            str = val.substr(0, 2) + "-" + val.substr(2, 3) + "-" + val.substr(5);
+        } else {
+            // 02-1234-5678 (10자리)
+            str = val.substr(0, 2) + "-" + val.substr(2, 4) + "-" + val.substr(6);
+        }
+    } 
+    // 3. 그 외 번호 (010, 031, 051 등)
+    else {
+        if (val.length < 4) {
+            str = val;
+        } else if (val.length < 7) {
+            // 010-123
+            str = val.substr(0, 3) + "-" + val.substr(3);
+        } else if (val.length < 11) {
+            // 010-123-4567 (10자리)
+            str = val.substr(0, 3) + "-" + val.substr(3, 3) + "-" + val.substr(6);
+        } else {
+            // 010-1234-5678 (11자리)
+            str = val.substr(0, 3) + "-" + val.substr(3, 4) + "-" + val.substr(7);
+        }
     }
+    // 최종 결과물 반영
+    target.value = str;
+};
     </script>
 </body>
 </html>

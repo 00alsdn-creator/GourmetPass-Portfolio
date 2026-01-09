@@ -37,7 +37,7 @@
         - 일반 회원가입은 "/joinProcess"(DB저장)로 가지만,
           점주는 아직 가게 정보를 입력 안 했으므로 "임시 저장(Session)"하는 컨트롤러로 보냅니다.
     --%>
-    <form action="${pageContext.request.contextPath}/member/signup/ownerStep1" method="post" id="joinForm">
+    <form action="<c:url value='/member/signup/ownerStep1'/>" method="post" id="joinForm">
         
         <%-- CSRF 토큰: POST 전송 시 필수 보안 토큰 --%>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
@@ -122,7 +122,7 @@
         if(userId.length < 3) { alert("아이디는 3글자 이상 입력해주세요."); return; }
         
         $.ajax({
-            url: "${pageContext.request.contextPath}/member/idCheck", // 컨트롤러 주소
+        	url: "<c:url value='/member/idCheck'/>", // 컨트롤러 주소
             type: "POST",
             data: { 
                 user_id: userId,
@@ -195,10 +195,44 @@
 
     // --- [기능 5] 전화번호 자동 하이픈 ---
     const autoHyphen = (target) => {
-        target.value = target.value
-            .replace(/[^0-9]/g, '')
-            .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "");
+    // 1. 숫자 이외의 문자 제거
+    let val = target.value.replace(/[^0-9]/g, "");
+    let str = "";
+
+    // 2. 서울 지역번호(02)인 경우
+    if (val.startsWith("02")) {
+        if (val.length < 3) {
+            str = val;
+        } else if (val.length < 6) {
+            // 02-123
+            str = val.substr(0, 2) + "-" + val.substr(2);
+        } else if (val.length < 10) {
+            // 02-123-4567 (9자리)
+            str = val.substr(0, 2) + "-" + val.substr(2, 3) + "-" + val.substr(5);
+        } else {
+            // 02-1234-5678 (10자리)
+            str = val.substr(0, 2) + "-" + val.substr(2, 4) + "-" + val.substr(6);
+        }
+    } 
+    // 3. 그 외 번호 (010, 031, 051 등)
+    else {
+        if (val.length < 4) {
+            str = val;
+        } else if (val.length < 7) {
+            // 010-123
+            str = val.substr(0, 3) + "-" + val.substr(3);
+        } else if (val.length < 11) {
+            // 010-123-4567 (10자리)
+            str = val.substr(0, 3) + "-" + val.substr(3, 3) + "-" + val.substr(6);
+        } else {
+            // 010-1234-5678 (11자리)
+            str = val.substr(0, 3) + "-" + val.substr(3, 4) + "-" + val.substr(7);
+        }
     }
+    
+    // 최종 결과물 반영
+    target.value = str;
+};
 </script>
 </body>
 </html>

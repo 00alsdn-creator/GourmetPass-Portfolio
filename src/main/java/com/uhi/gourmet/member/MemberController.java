@@ -1,17 +1,13 @@
 package com.uhi.gourmet.member;
 
 import java.security.Principal;
-import java.util.List; // 추가
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.uhi.gourmet.member.MemberService; // Service 인터페이스 import
 import com.uhi.gourmet.store.StoreMapper;
 import com.uhi.gourmet.store.StoreVO;
 
@@ -28,13 +25,12 @@ import com.uhi.gourmet.store.StoreVO;
 public class MemberController {
 
     @Autowired
-    private MemberMapper memberMapper;
+    private MemberService memberService; // 변경: Mapper -> Service 사용
 
     @Autowired
-    private StoreMapper storeMapper;
+    private StoreMapper storeMapper; // 조회용으로 유지 (필요 시 StoreService로 분리 가능)
 
-    @Autowired
-    private BCryptPasswordEncoder pwEncoder;
+    // 암호화 인코더(BCryptPasswordEncoder)는 Service 내부로 이동했으므로 제거
 
     @Value("${kakao.js.key}")
     private String kakaoJsKey;
@@ -65,9 +61,8 @@ public class MemberController {
 
     @PostMapping("/joinProcess")
     public String joinProcess(MemberVO vo) {
-        vo.setUser_pw(pwEncoder.encode(vo.getUser_pw()));
-        vo.setUser_role("ROLE_USER"); 
-        memberMapper.join(vo);
+        // 로직 이임: 암호화 및 권한 설정은 Service가 담당
+        memberService.joinMember(vo);
         return "redirect:/member/login"; 
     }
 
@@ -92,18 +87,13 @@ public class MemberController {
         return "member/signup_owner2";
     }
 
-    @Transactional
     @PostMapping("/signup/ownerFinal")
     public String ownerFinalProcess(StoreVO storeVo, HttpSession session) {
         MemberVO memberVo = (MemberVO) session.getAttribute("tempMember");
         if (memberVo == null) return "redirect:/member/signup/owner1";
 
-        memberVo.setUser_pw(pwEncoder.encode(memberVo.getUser_pw()));
-        memberVo.setUser_role("ROLE_OWNER"); 
-        
-        memberMapper.join(memberVo);
-        storeVo.setUser_id(memberVo.getUser_id());
-        storeMapper.insertStore(storeVo);
+        // 로직 이임: 트랜잭션(@Transactional) 처리도 Service 내부에서 수행
+        memberService.joinOwner(memberVo, storeVo);
 
         session.removeAttribute("tempMember");
         return "redirect:/member/login";
@@ -115,15 +105,15 @@ public class MemberController {
     public String mypage(Principal principal, Model model, HttpServletRequest request) {
         String userId = principal.getName();
         
-        // 1. 회원 기본 정보 로드
-        MemberVO member = memberMapper.getMemberById(userId);
+        // 1. 회원 기본 정보 로드 (Service 사용)
+        MemberVO member = memberService.getMember(userId);
         model.addAttribute("member", member);
 
         // 2. 점주 권한인 경우 (1:1 구조 반영)
+        // Store 조회 로직은 일단 기존 Mapper 유지 (추후 StoreService 생성 권장)
         if (request.isUserInRole("ROLE_OWNER")) {
-            // 단건 조회로 변경
             StoreVO store = storeMapper.getStoreByUserId(userId);
-            model.addAttribute("store", store); // 변수명을 'store'로 복구
+            model.addAttribute("store", store); 
             
             if (store != null) {
                 model.addAttribute("menuList", storeMapper.getMenuList(store.getStore_id()));
@@ -138,7 +128,8 @@ public class MemberController {
     @GetMapping("/edit")
     public String editPage(Principal principal, Model model) {
         String userId = principal.getName();
-        MemberVO member = memberMapper.getMemberById(userId);
+        // Service 사용
+        MemberVO member = memberService.getMember(userId);
         model.addAttribute("member", member);
         addKakaoKeyToModel(model);
         return "member/member_edit"; 
@@ -146,14 +137,18 @@ public class MemberController {
     
     @PostMapping("/edit")
     public String updateProcess(MemberVO vo, RedirectAttributes rttr) {
-        memberMapper.updateMember(vo);
+        // 로직 이임: 비밀번호 암호화 여부 판단은 Service가 담당
+        memberService.updateMember(vo);
         rttr.addFlashAttribute("msg", "회원 정보가 수정되었습니다.");
         return "redirect:/member/mypage";
     }
 
     @PostMapping("/delete")
     public String deleteMember(@RequestParam("user_id") String user_id, HttpSession session, RedirectAttributes rttr) {
-        memberMapper.deleteMember(user_id);
+        // Service 사용
+        memberService.deleteMember(user_id);
+        
+        // Security Context 및 세션 정리는 컨트롤러(프레젠테이션 계층)의 역할이 맞으므로 유지
         SecurityContextHolder.clearContext();
         if (session != null) {
             session.invalidate();
@@ -167,7 +162,8 @@ public class MemberController {
     @PostMapping("/idCheck")
     @ResponseBody
     public String idCheck(@RequestParam("user_id") String user_id) {
-        int count = memberMapper.idCheck(user_id);
+        // Service 사용
+        int count = memberService.checkIdDuplicate(user_id);
         return (count > 0) ? "fail" : "success";
     }
 }

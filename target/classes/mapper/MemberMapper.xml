@@ -1,86 +1,78 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBatis Mapper 파일 선언: DTD로 문법을 검증하고 XML 구조를 정의 -->
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!-- [Mapper 선언]
-     - namespace: 이 Mapper 파일을 Java Interface와 연결하는 식별자
-     - com.uhi.gourmet.member.MemberMapper 인터페이스의 메서드들이 여기 정의된 SQL과 1:1 매핑됨 -->
 <mapper namespace="com.uhi.gourmet.member.MemberMapper">
 
-    <!-- [비밀번호 조회]
-         - id: 인터페이스 메서드명과 동일해야 함 (getPassword)
-         - resultType: SQL 실행 결과를 어떤 Java 타입으로 받을지 지정 (String)
-         - #{user_id}: Java에서 넘어온 파라미터(user_id)를 SQL에 바인딩
-         - enabled='Y': 활성화된 회원만 조회(탈퇴/정지 계정 제외) -->
-    <select id="getPassword" resultType="string">
-        SELECT user_pw FROM MEMBERS
-        WHERE user_id = #{user_id} AND enabled = 'Y'
+    <!-- 1. 비밀번호 조회 (로그인 시 사용) -->
+    <select id="getPassword" resultType="String">
+        SELECT user_pw 
+        FROM MEMBERS
+        WHERE user_id = #{user_id} 
+          AND enabled = 'Y'
     </select>
 
-    <!-- [회원가입]
-         - INSERT문: MEMBERS 테이블에 신규 회원 데이터를 추가
-         - #{필드명, jdbcType=타입}: Java VO의 필드를 SQL 파라미터로 매핑
-           (jdbcType은 NULL 허용 컬럼에서 명시적 타입 지정 시 사용)
-         - 'Y': enabled 기본값(활성 상태로 가입)
-         - SYSDATE: 오라클 내장 함수로 현재 시각 자동 입력 -->
+    <!-- 2. 회원 가입 -->
     <insert id="join">
         INSERT INTO MEMBERS (
             user_id, user_pw, user_nm, user_email, user_tel,
             user_zip, user_addr1, user_addr2, user_lat, user_lon,
             user_role, enabled, user_regdate
         ) VALUES (
-            #{user_id, jdbcType=VARCHAR},
-            #{user_pw, jdbcType=VARCHAR},
-            #{user_nm, jdbcType=VARCHAR},
-            #{user_email, jdbcType=VARCHAR},
-            #{user_tel, jdbcType=VARCHAR},
-            #{user_zip, jdbcType=VARCHAR},
-            #{user_addr1, jdbcType=VARCHAR},
+            #{user_id}, 
+            #{user_pw}, 
+            #{user_nm}, 
+            #{user_email}, 
+            #{user_tel},
+            #{user_zip, jdbcType=VARCHAR}, 
+            #{user_addr1, jdbcType=VARCHAR}, 
             #{user_addr2, jdbcType=VARCHAR},
-            #{user_lat, jdbcType=NUMERIC},
+            #{user_lat, jdbcType=NUMERIC}, 
             #{user_lon, jdbcType=NUMERIC},
-            #{user_role, jdbcType=VARCHAR},
-            'Y',
+            #{user_role}, 
+            'Y', 
             SYSDATE
         )
     </insert>
 
-    <!-- [아이디 중복 확인]
-         - COUNT(*): 해당 user_id를 가진 행의 개수를 반환(0이면 사용 가능, 1 이상이면 중복)
-         - resultType="int": 숫자형 결과를 Java int로 받음 -->
+    <!-- 3. 아이디 중복 체크 -->
     <select id="idCheck" resultType="int">
-        SELECT COUNT(*) FROM MEMBERS
+        SELECT COUNT(*) 
+        FROM MEMBERS
         WHERE user_id = #{user_id}
     </select>
 
-    <!-- [회원 정보 조회]
-         - resultType: SQL 결과를 MemberVO 객체로 자동 매핑(컬럼명 = VO 필드명 일치 시)
-         - SELECT *: MEMBERS 테이블의 모든 컬럼을 조회하여 VO에 담음 -->
+    <!-- 4. 회원 상세 정보 조회 -->
     <select id="getMemberById" resultType="com.uhi.gourmet.member.MemberVO">
-        SELECT * FROM MEMBERS WHERE user_id = #{user_id}
+        SELECT * 
+        FROM MEMBERS 
+        WHERE user_id = #{user_id}
     </select>
-    
-    <!-- [회원 정보 수정]
-         - parameterType: 파라미터로 받는 Java 객체의 타입 명시(선택 사항이지만 가독성↑)
-         - UPDATE문: 기존 행의 특정 컬럼 값을 변경
-         - WHERE user_id = #{user_id}: 수정 대상을 식별하는 조건(필수) -->
-    <update id="updateMember" parameterType="com.uhi.gourmet.member.MemberVO">
+
+    <!-- 5. 회원 정보 수정 (핵심 수정!) -->
+    <!-- <set> 태그를 쓰면 마지막 콤마(,)를 자동으로 제거해줍니다. -->
+    <update id="updateMember">
         UPDATE MEMBERS
-        SET 
-            user_nm = #{user_nm, jdbcType=VARCHAR},
-            user_email = #{user_email, jdbcType=VARCHAR},
-            user_tel = #{user_tel, jdbcType=VARCHAR},
-            user_zip = #{user_zip, jdbcType=VARCHAR},
-            user_addr1 = #{user_addr1, jdbcType=VARCHAR},
-            user_addr2 = #{user_addr2, jdbcType=VARCHAR},
-            user_lat = #{user_lat, jdbcType=NUMERIC},
-            user_lon = #{user_lon, jdbcType=NUMERIC}
+        <set>
+            user_nm = #{user_nm},
+            user_email = #{user_email},
+            user_tel = #{user_tel},
+            user_zip = #{user_zip},
+            user_addr1 = #{user_addr1},
+            user_addr2 = #{user_addr2},
+            user_lat = #{user_lat},
+            user_lon = #{user_lon},
+            
+            <!-- 비밀번호가 비어있지 않을 때만 업데이트 -->
+            <if test="user_pw != null and user_pw != ''">
+                user_pw = #{user_pw}
+            </if>
+        </set>
         WHERE user_id = #{user_id}
     </update>
 
-    <!-- [회원 탈퇴]
-         - DELETE문: MEMBERS 테이블에서 해당 user_id 행을 완전히 삭제
-         - 실무에서는 논리 삭제(enabled='N' UPDATE)를 더 선호하는 경우가 많음 -->
+    <!-- 6. 회원 탈퇴 -->
     <delete id="deleteMember">
         DELETE FROM MEMBERS 
         WHERE user_id = #{user_id}
