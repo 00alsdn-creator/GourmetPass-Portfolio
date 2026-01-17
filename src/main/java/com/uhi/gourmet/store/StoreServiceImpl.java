@@ -1,9 +1,17 @@
+/* com/uhi/gourmet/store/StoreServiceImpl.java */
 package com.uhi.gourmet.store;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class StoreServiceImpl implements StoreService {
@@ -112,5 +120,51 @@ public class StoreServiceImpl implements StoreService {
                 storeMapper.updateMenu(vo);
             }
         }
+    }
+
+    // [수정 포인트: 시간 슬롯 생성 로직 구현]
+    @Override
+    public List<String> generateTimeSlots(StoreVO store) {
+        List<String> slots = new ArrayList<>();
+        if (store == null || store.getOpen_time() == null || store.getClose_time() == null) {
+            return slots;
+        }
+
+        try {
+            // DB의 HH:mm:ss 또는 HH:mm 형식을 유연하게 처리
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("HH:mm[:ss]");
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            LocalTime open = LocalTime.parse(store.getOpen_time(), inputFormatter);
+            LocalTime close = LocalTime.parse(store.getClose_time(), inputFormatter);
+            int unit = (store.getRes_unit() <= 0) ? 30 : store.getRes_unit();
+
+            LocalTime current = open;
+            while (current.isBefore(close)) {
+                slots.add(current.format(outputFormatter));
+                current = current.plusMinutes(unit);
+            }
+        } catch (Exception e) {
+            System.err.println("TimeSlot Generation Error: " + e.getMessage());
+        }
+        return slots;
+    }
+
+    // [수정 포인트: 파일 업로드 로직 구현]
+    @Override
+    public String uploadFile(MultipartFile file, String realPath) {
+        File dir = new File(realPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        String originalName = file.getOriginalFilename();
+        String savedName = System.currentTimeMillis() + "_" + originalName;
+
+        try {
+            file.transferTo(new File(realPath, savedName));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return savedName;
     }
 }

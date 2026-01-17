@@ -1,13 +1,9 @@
+/* com/uhi/gourmet/store/StoreController.java */
 package com.uhi.gourmet.store;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map; 
-import java.io.File;
-import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.uhi.gourmet.book.BookService;
+import com.uhi.gourmet.review.ReviewService;
+import com.uhi.gourmet.review.ReviewVO;
 import com.uhi.gourmet.wait.WaitService;
-import com.uhi.gourmet.book.BookService; // [추가] 예약 서비스 임포트
-import com.uhi.gourmet.review.ReviewService; 
-import com.uhi.gourmet.review.ReviewVO;      
 
 @Controller
 @RequestMapping("/store")
@@ -39,10 +35,10 @@ public class StoreController {
     private WaitService waitService;
 
     @Autowired
-    private BookService bookService; // [추가] 예약 서비스 주입
+    private BookService bookService;
 
     @Autowired
-    private ReviewService reviewService; 
+    private ReviewService reviewService;
 
     @Value("${kakao.js.key}")
     private String kakaoJsKey;
@@ -64,7 +60,7 @@ public class StoreController {
         return "store/store_list";
     }
 
-    // 2. 맛집 상세 정보 조회
+    // 2. 맛집 상세 정보 조회 (리팩토링: 시간 슬롯 생성 로직을 서비스로 위임)
     @GetMapping("/detail")
     public String storeDetail(@RequestParam("storeId") int storeId, Model model, Principal principal) {
         storeService.plusViewCount(storeId);
@@ -83,8 +79,8 @@ public class StoreController {
             store.setReview_cnt(cntVal != null ? Integer.parseInt(String.valueOf(cntVal)) : 0);
             store.setAvg_rating(rateVal != null ? Double.parseDouble(String.valueOf(rateVal)) : 0.0);
             
-            List<String> timeSlots = generateTimeSlots(store);
-            model.addAttribute("timeSlots", timeSlots);
+            // [수정 포인트] 서비스 계층에서 시간 슬롯 데이터 생성
+            model.addAttribute("timeSlots", storeService.generateTimeSlots(store));
         }
 
         List<ReviewVO> reviewList = reviewService.getStoreReviews(storeId);
@@ -107,12 +103,12 @@ public class StoreController {
     @ResponseBody 
     public List<String> getTimeSlots(@RequestParam("store_id") int storeId) {
         StoreVO store = storeService.getStoreDetail(storeId);
-        return generateTimeSlots(store);
+        // [수정 포인트] 내부 private 메서드 대신 서비스 메서드 호출
+        return storeService.generateTimeSlots(store);
     }
 
-    // ================= [점주 전용: 상태 제어 로직 추가] =================
+    // ================= [점주 전용: 상태 제어 로직] =================
 
-    // [v1.0.4 추가] 웨이팅 상태 변경 (ING, FINISH 등)
     @PostMapping("/wait/updateStatus")
     public String updateWaitStatus(@RequestParam("wait_id") int waitId, 
                                  @RequestParam("status") String status) {
@@ -120,7 +116,6 @@ public class StoreController {
         return "redirect:/member/mypage";
     }
 
-    // [v1.0.4 추가] 예약 상태 변경 (ING, FINISH 등)
     @PostMapping("/book/updateStatus")
     public String updateBookStatus(@RequestParam("book_id") int bookId, 
                                  @RequestParam("status") String status) {
@@ -128,7 +123,7 @@ public class StoreController {
         return "redirect:/member/mypage";
     }
 
-    // ================= [가게 정보 관리] =================
+    // ================= [가게 정보 관리 (리팩토링: 파일 업로드 로직 서비스 위임)] =================
 
     @GetMapping("/register")
     public String registerStorePage() {
@@ -141,7 +136,9 @@ public class StoreController {
                                      HttpServletRequest request,
                                      Principal principal) {
         if (file != null && !file.isEmpty()) {
-            vo.setStore_img(uploadFile(file, request));
+            // [수정 포인트] 서비스 계층으로 실제 저장 경로 전달 후 처리
+            String realPath = request.getSession().getServletContext().getRealPath("/resources/upload");
+            vo.setStore_img(storeService.uploadFile(file, realPath));
         }
         storeService.registerStore(vo, principal.getName());
         return "redirect:/member/mypage";
@@ -162,7 +159,8 @@ public class StoreController {
                                      HttpServletRequest request,
                                      Principal principal) {
         if (file != null && !file.isEmpty()) {
-            vo.setStore_img(uploadFile(file, request));
+            String realPath = request.getSession().getServletContext().getRealPath("/resources/upload");
+            vo.setStore_img(storeService.uploadFile(file, realPath));
         }
         storeService.modifyStore(vo, principal.getName());
         return "redirect:/member/mypage";
@@ -185,7 +183,8 @@ public class StoreController {
                                       HttpServletRequest request,
                                       Principal principal) {
         if (file != null && !file.isEmpty()) {
-            menuVO.setMenu_img(uploadFile(file, request));
+            String realPath = request.getSession().getServletContext().getRealPath("/resources/upload");
+            menuVO.setMenu_img(storeService.uploadFile(file, realPath));
         }
         storeService.addMenu(menuVO, principal.getName());
         return "redirect:/member/mypage"; 
@@ -212,52 +211,10 @@ public class StoreController {
                                     HttpServletRequest request,
                                     Principal principal) {
         if (file != null && !file.isEmpty()) {
-            vo.setMenu_img(uploadFile(file, request));
+            String realPath = request.getSession().getServletContext().getRealPath("/resources/upload");
+            vo.setMenu_img(storeService.uploadFile(file, realPath));
         }
         storeService.modifyMenu(vo, principal.getName());
         return "redirect:/member/mypage";
-    }
-
-    // ================= [Private Helpers] =================
-
-    private List<String> generateTimeSlots(StoreVO store) {
-        List<String> slots = new ArrayList<>();
-        if (store == null || store.getOpen_time() == null || store.getClose_time() == null) {
-            return slots;
-        }
-
-        try {
-            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("HH:mm[:ss]");
-            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
-            LocalTime open = LocalTime.parse(store.getOpen_time(), inputFormatter);
-            LocalTime close = LocalTime.parse(store.getClose_time(), inputFormatter);
-            int unit = (store.getRes_unit() <= 0) ? 30 : store.getRes_unit();
-
-            LocalTime current = open;
-            while (current.isBefore(close)) {
-                slots.add(current.format(outputFormatter));
-                current = current.plusMinutes(unit);
-            }
-        } catch (Exception e) {
-            System.err.println("TimeSlot Generation Error: " + e.getMessage());
-        }
-        return slots;
-    }
-
-    private String uploadFile(MultipartFile file, HttpServletRequest request) {
-        String uploadPath = request.getSession().getServletContext().getRealPath("/resources/upload");
-        File dir = new File(uploadPath);
-        if (!dir.exists()) dir.mkdirs();
-
-        String originalName = file.getOriginalFilename();
-        String savedName = System.currentTimeMillis() + "_" + originalName;
-
-        try {
-            file.transferTo(new File(uploadPath, savedName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return savedName;
     }
 }

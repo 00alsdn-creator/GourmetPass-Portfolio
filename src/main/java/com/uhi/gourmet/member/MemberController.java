@@ -134,49 +134,15 @@ public class MemberController {
         }
     }
 
-    // [v1.0.8 수정] NPE 방지를 위한 방어 코드 추가
+    // [수정 포인트: 로직을 서비스로 위임하여 코드 슬림화]
     @GetMapping("/myStatus")
     public String myStatus(Principal principal, Model model) {
-        // Principal 체크 (보안 강화)
         if (principal == null) return "redirect:/member/login";
         
         String user_id = principal.getName();
         
-        List<BookVO> my_book_list = book_service.get_my_book_list(user_id);
-        List<WaitVO> my_wait_list = wait_service.get_my_wait_list(user_id);
-        
-        // [NPE 방지] 리스트가 null인 경우 빈 리스트로 초기화
-        if (my_book_list == null) my_book_list = new ArrayList<>();
-        if (my_wait_list == null) my_wait_list = new ArrayList<>();
-        
-        // 1. 현재 이용 중인 서비스 (WAITING, CALLED, ING)
-        model.addAttribute("activeWait", my_wait_list.stream()
-            .filter(w -> "WAITING".equals(w.getWait_status()) || "CALLED".equals(w.getWait_status()) || "ING".equals(w.getWait_status()))
-            .findFirst().orElse(null));
-            
-        model.addAttribute("activeBook", my_book_list.stream()
-            .filter(b -> "RESERVED".equals(b.getBook_status()) || "ING".equals(b.getBook_status()))
-            .findFirst().orElse(null));
-
-        // 2. 방문 완료 히스토리 (FINISH)
-        List<WaitVO> finishedWaits = my_wait_list.stream()
-            .filter(w -> "FINISH".equals(w.getWait_status()))
-            .collect(Collectors.toList());
-        
-        List<BookVO> finishedBooks = my_book_list.stream()
-            .filter(b -> "FINISH".equals(b.getBook_status()))
-            .collect(Collectors.toList());
-
-        model.addAttribute("finishedWaits", finishedWaits);
-        model.addAttribute("finishedBooks", finishedBooks);
-        
-        // 3. 미작성 리뷰 개수 계산
-        long pendingReviewCount = finishedWaits.stream().filter(w -> w.getReview_id() == null).count()
-                                + finishedBooks.stream().filter(b -> b.getReview_id() == null).count();
-        model.addAttribute("pendingReviewCount", pendingReviewCount);
-        
-        model.addAttribute("my_book_list", my_book_list);
-        model.addAttribute("my_wait_list", my_wait_list);
+        // 모든 복잡한 필터링 및 통계 계산은 Service Layer에서 수행
+        model.addAllAttributes(memberService.getMyStatusSummary(user_id));
         
         return "member/myStatus"; 
     }

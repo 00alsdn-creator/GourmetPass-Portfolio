@@ -1,9 +1,18 @@
+/* com/uhi/gourmet/wait/WaitServiceImpl.java */
 package com.uhi.gourmet.wait;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.uhi.gourmet.book.BookService; // 추가
+import com.uhi.gourmet.book.BookVO;
 
 @Service
 @Transactional
@@ -12,20 +21,14 @@ public class WaitServiceImpl implements WaitService {
     @Autowired
     private WaitMapper wait_mapper;
 
-    /**
-     * 웨이팅 등록 로직
-     * [백엔드 포인트] synchronized를 통해 아주 짧은 찰나에 발생하는 중복 번호 발급 방지
-     */
+    @Autowired
+    private BookService book_service; // [수정 포인트: 도메인 간 협력을 위한 서비스 주입]
+
     @Override
     public synchronized void register_wait(WaitVO vo) {
-        // 1. 오늘 날짜의 해당 매장 최대 대기 번호 조회
         Integer max_num = wait_mapper.selectMaxWaitNum(vo.getStore_id());
-        
-        // 2. 새 번호 발급 (오늘 첫 팀이면 1번, 아니면 max + 1)
         int next_num = (max_num == null) ? 1 : max_num + 1;
         vo.setWait_num(next_num);
-        
-        // 3. DB Insert
         wait_mapper.insertWait(vo);
     }
 
@@ -47,5 +50,40 @@ public class WaitServiceImpl implements WaitService {
     @Override
     public void update_wait_status(int wait_id, String status) {
         wait_mapper.updateWaitStatus(wait_id, status);
+    }
+
+    // [수정 포인트: Controller의 비즈니스 로직(필터링, 요약) 이전]
+    @Override
+    public Map<String, Object> getMyStatusSummary(String userId) {
+        Map<String, Object> summary = new HashMap<>();
+        
+        List<WaitVO> my_wait_list = wait_mapper.selectMyWaitList(userId);
+        List<BookVO> my_book_list = book_service.get_my_book_list(userId);
+        
+        if (my_wait_list == null) my_wait_list = new ArrayList<>();
+        if (my_book_list == null) my_book_list = new ArrayList<>();
+
+        // 1. 진행 중인 내역 필터링
+        summary.put("activeWait", my_wait_list.stream()
+                .filter(w -> "WAITING".equals(w.getWait_status()) || "CALLED".equals(w.getWait_status()))
+                .findFirst().orElse(null));
+        
+        summary.put("activeBook", my_book_list.stream()
+                .filter(b -> "RESERVED".equals(b.getBook_status()))
+                .findFirst().orElse(null));
+
+        // 2. 리뷰 작성이 가능한 완료 내역(FINISH) 추출
+        summary.put("finishedWaits", my_wait_list.stream()
+                .filter(w -> "FINISH".equals(w.getWait_status()))
+                .collect(Collectors.toList()));
+        
+        summary.put("finishedBooks", my_book_list.stream()
+                .filter(b -> "FINISH".equals(b.getBook_status()))
+                .collect(Collectors.toList()));
+
+        summary.put("my_wait_list", my_wait_list);
+        summary.put("my_book_list", my_book_list);
+        
+        return summary;
     }
 }

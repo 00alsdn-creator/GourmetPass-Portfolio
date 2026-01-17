@@ -1,6 +1,8 @@
+/* com/uhi/gourmet/store/StoreService.java */
 package com.uhi.gourmet.store;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile; // 추가
 
 public interface StoreService {
     // 1. 맛집 목록 및 상세 조회 (Public)
@@ -12,12 +14,16 @@ public interface StoreService {
     // 2. 가게 관리 (Owner Only)
     void registerStore(StoreVO vo, String userId);
     void modifyStore(StoreVO vo, String userId);
-    StoreVO getMyStore(int storeId, String userId); // 소유권 검증 포함 조회
-    StoreVO get_store_by_user_id(String userId);    // 점주 ID로 가게 조회
+    StoreVO getMyStore(int storeId, String userId); 
+    StoreVO get_store_by_user_id(String userId);    
     
     // 3. 메뉴 관리 (Owner Only)
     void addMenu(MenuVO vo, String userId);
     void removeMenu(int menuId, String userId);
-    MenuVO getMenuDetail(int menuId, String userId); // 소유권 검증 포함 조회
+    MenuVO getMenuDetail(int menuId, String userId); 
     void modifyMenu(MenuVO vo, String userId);
+
+    // [수정 포인트: 비즈니스 로직 명세 추가]
+    List<String> generateTimeSlots(StoreVO store);
+    String uploadFile(MultipartFile file, String realPath);
 }

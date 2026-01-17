@@ -1,8 +1,7 @@
+/* com/uhi/gourmet/wait/WaitController.java */
 package com.uhi.gourmet.wait;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -13,9 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.uhi.gourmet.book.BookService;
-import com.uhi.gourmet.book.BookVO;
-
 @Controller
 @RequestMapping("/wait")
 public class WaitController {
@@ -23,16 +19,14 @@ public class WaitController {
     @Autowired
     private WaitService wait_service;
 
-    @Autowired
-    private BookService book_service; // [추가] 예약 내역 조회를 위해 주입
-
+    // [리팩토링] 로직이 서비스로 이전됨에 따라 타 도메인 서비스(BookService) 직접 주입 제거
+    
     @Autowired
     private SimpMessagingTemplate messaging_template;
 
     /**
      * 일반 회원: 내 이용현황 페이지 조회
-     * - 현재 진행 중인 예약/웨이팅 '만' 상단에 노출
-     * - 하단에 전체 내역으로 가는 버튼 제공
+     * [수정] 복잡한 필터링 및 Stream 로직을 WaitService.getMyStatusSummary로 위임
      */
     @GetMapping("/myStatus")
     public String my_status(Principal principal, Model model) {
@@ -42,38 +36,8 @@ public class WaitController {
         
         String user_id = principal.getName();
         
-        // 1. 모든 내역 가져오기
-        List<WaitVO> my_wait_list = wait_service.get_my_wait_list(user_id);
-        List<BookVO> my_book_list = book_service.get_my_book_list(user_id);
-        
-        // 2. 진행 중인 내역 필터링 (웨이팅: WAITING, CALLED / 예약: RESERVED)
-        // 가장 최근의 진행 중인 건 1건만 별도로 전달
-        WaitVO activeWait = my_wait_list.stream()
-                .filter(w -> "WAITING".equals(w.getWait_status()) || "CALLED".equals(w.getWait_status()))
-                .findFirst().orElse(null);
-        
-        BookVO activeBook = my_book_list.stream()
-                .filter(b -> "RESERVED".equals(b.getBook_status()))
-                .findFirst().orElse(null);
-
-        // 3. 리뷰 작성이 가능한 최근 완료 내역 (FINISH) 추출
-        List<WaitVO> finishedWaits = my_wait_list.stream()
-                .filter(w -> "FINISH".equals(w.getWait_status()))
-                .collect(Collectors.toList());
-        
-        List<BookVO> finishedBooks = my_book_list.stream()
-                .filter(b -> "FINISH".equals(b.getBook_status()))
-                .collect(Collectors.toList());
-
-        // 모델에 데이터 담기
-        model.addAttribute("activeWait", activeWait);
-        model.addAttribute("activeBook", activeBook);
-        model.addAttribute("finishedWaits", finishedWaits);
-        model.addAttribute("finishedBooks", finishedBooks);
-        
-        // 전체 내역 보기를 위한 원본 리스트도 유지
-        model.addAttribute("my_wait_list", my_wait_list);
-        model.addAttribute("my_book_list", my_book_list);
+        // [수정 포인트] 서비스 계층에서 가공된 모든 상태 데이터를 한 번에 모델에 추가
+        model.addAllAttributes(wait_service.getMyStatusSummary(user_id));
         
         return "wait/myStatus";
     }
@@ -85,9 +49,11 @@ public class WaitController {
         }
         vo.setUser_id(principal.getName());
         wait_service.register_wait(vo);
-        messaging_template.convertAndSend("/topic/store/" + vo.getStore_id(), "새로운 웨이팅이 접수되었습니다! 번호: " + vo.getWait_num());
         
-        // 등록 후 바로 이용현황 페이지로 이동하여 내 상태를 확인하게 함
+        // 실시간 알림 전송
+        messaging_template.convertAndSend("/topic/store/" + vo.getStore_id(), 
+            "새로운 웨이팅이 접수되었습니다! 번호: " + vo.getWait_num());
+        
         return "redirect:/wait/myStatus";
     }
 
@@ -95,10 +61,15 @@ public class WaitController {
     public String update_status(@RequestParam("wait_id") int wait_id, 
                                 @RequestParam(value="user_id", required=false) String user_id,
                                 @RequestParam("status") String status) {
+        
         wait_service.update_wait_status(wait_id, status);
+        
+        // 상태가 'CALLED'일 경우 해당 유저에게 실시간 알림 발송
         if ("CALLED".equals(status) && user_id != null) {
-            messaging_template.convertAndSend("/topic/wait/" + user_id, "입장하실 순서입니다! 매장으로 방문해주세요.");
+            messaging_template.convertAndSend("/topic/wait/" + user_id, 
+                "입장하실 순서입니다! 매장으로 방문해주세요.");
         }
+        
         return "redirect:/book/manage";
     }
 

@@ -1,10 +1,12 @@
+/* com/uhi/gourmet/book/BookService.java */
 package com.uhi.gourmet.book;
 
 import java.util.List;
 
 public interface BookService {
-    // 예약 등록
-    void register_book(BookVO vo);
+    
+
+    void register_book(BookVO vo, String date, String time);
     
     // 일반 회원: 내 예약 목록 조회
     List<BookVO> get_my_book_list(String user_id);
