@@ -33,4 +33,9 @@ public interface WaitMapper {
      * 전체 대기자에게 실시간 방송(Broadcast) 신호를 보내기 위해 필요합니다.
      */
     WaitVO selectWaitDetail(int wait_id);
+    
+    int existsWaitingToday(
+            @Param("user_id") String user_id,
+            @Param("store_id") int store_id
+        );
 }

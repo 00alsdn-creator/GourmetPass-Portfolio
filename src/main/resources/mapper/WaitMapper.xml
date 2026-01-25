@@ -59,4 +59,14 @@
 		WHERE wait_id = #{wait_id}
 	</select>
 
+	<select id="existsWaitingToday" resultType="int">
+		SELECT COUNT(*)
+		FROM WAIT
+		WHERE user_id = #{user_id}
+		AND store_id = #{store_id}
+		AND wait_status = 'WAITING'
+		AND TRUNC(wait_date) = TRUNC(SYSDATE)
+	</select>
+	
+
 </mapper>
