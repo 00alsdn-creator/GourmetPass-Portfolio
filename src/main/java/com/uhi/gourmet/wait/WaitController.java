@@ -42,14 +42,24 @@ public class WaitController {
      * [2] 웨이팅 등록
      */
     @PostMapping("/register")
-    public String register_wait(WaitVO vo, Principal principal) {
+    public String register_wait(WaitVO vo, Principal principal, Model model) {
         if (principal == null) {
             return "redirect:/member/login";
         }
         
-        vo.setUser_id(principal.getName());
-        wait_service.register_wait(vo);
+        String user_id = principal.getName();
+        vo.setUser_id(user_id);
         
+        try {
+            // 중복 체크 + 등록은 전부 서비스에서
+            wait_service.register_wait(vo);
+
+        } catch (IllegalStateException e) {
+            model.addAttribute("msg", e.getMessage());
+            model.addAttribute("url", "/wait/status");
+            return "common/alert";
+        }
+    
         // 점주에게 실시간 알림 전송 (새로운 웨이팅 발생)
         messaging_template.convertAndSend("/topic/store/" + vo.getStore_id(), 
             "새로운 웨이팅이 접수되었습니다! 번호: " + vo.getWait_num());

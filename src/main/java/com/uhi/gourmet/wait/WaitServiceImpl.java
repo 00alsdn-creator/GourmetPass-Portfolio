@@ -23,12 +23,26 @@ public class WaitServiceImpl implements WaitService {
 
     @Autowired
     private BookService book_service; // [수정 포인트: 도메인 간 협력을 위한 서비스 주입]
-
+    
+    @Override
+    public boolean hasWaitingToday(String user_id, int store_id) {
+        return wait_mapper.existsWaitingToday(user_id, store_id) > 0;
+    }
+    
     @Override
     public synchronized void register_wait(WaitVO vo) {
+    	
+        // 오늘 중복 웨이팅 체크
+        if (wait_mapper.existsWaitingToday(vo.getUser_id(), vo.getStore_id()) > 0) {
+            throw new IllegalStateException("이미 오늘 웨이팅이 있습니다.");
+        }
+
+        // 오늘 가게별 다음 번호 계산
         Integer max_num = wait_mapper.selectMaxWaitNum(vo.getStore_id());
         int next_num = (max_num == null) ? 1 : max_num + 1;
         vo.setWait_num(next_num);
+
+        // 등록
         wait_mapper.insertWait(vo);
     }
 

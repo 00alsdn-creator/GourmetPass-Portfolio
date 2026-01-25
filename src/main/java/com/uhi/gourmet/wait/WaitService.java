@@ -14,4 +14,7 @@ public interface WaitService {
 
     // [추가] 특정 웨이팅 상세 정보 조회 (Controller에서 호출함)
     WaitVO get_wait_detail(int wait_id); 
+    
+ // [추가] 오늘 중복 웨이팅 체크
+   boolean hasWaitingToday(String user_id, int store_id);
 }
