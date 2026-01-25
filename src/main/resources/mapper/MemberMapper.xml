@@ -5,67 +5,71 @@
 
 <mapper namespace="com.uhi.gourmet.member.MemberMapper">
 
-	<select id="getPassword" resultType="String">
-		SELECT user_pw
-		FROM MEMBERS
-		WHERE user_id = #{user_id}
-		AND enabled = 'Y'
-	</select>
+    <select id="getPassword" resultType="String">
+        SELECT user_pw
+        FROM MEMBERS
+        WHERE user_id = #{user_id}
+        AND enabled = 'Y'
+    </select>
 
-	<insert id="join">
-		INSERT INTO MEMBERS (
-			user_id, user_pw, user_nm, user_email, user_tel,
-			user_zip, user_addr1, user_addr2, user_lat, user_lon,
-			user_role, enabled, user_regdate
-		) VALUES (
-			#{user_id},
-			#{user_pw},
-			#{user_nm},
-			#{user_email, jdbcType=VARCHAR}, #{user_tel},
-			#{user_zip, jdbcType=VARCHAR},
-			#{user_addr1, jdbcType=VARCHAR},
-			#{user_addr2, jdbcType=VARCHAR},
-			#{user_lat, jdbcType=NUMERIC},
-			#{user_lon, jdbcType=NUMERIC},
-			#{user_role},
-			'Y',
-			SYSDATE
-		)
-	</insert>
+    <insert id="join">
+        INSERT INTO MEMBERS (
+            user_id, user_pw, user_nm, user_email, user_tel,
+            user_zip, user_addr1, user_addr2, user_lat, user_lon,
+            user_role, enabled, user_regdate
+        ) VALUES (
+            #{user_id},
+            #{user_pw},
+            #{user_nm},
+            #{user_email, jdbcType=VARCHAR},
+            #{user_tel},
+            #{user_zip, jdbcType=VARCHAR},
+            #{user_addr1, jdbcType=VARCHAR},
+            #{user_addr2, jdbcType=VARCHAR},
+            #{user_lat, jdbcType=NUMERIC},
+            #{user_lon, jdbcType=NUMERIC},
+            #{user_role},
+            'Y',
+            SYSDATE
+        )
+    </insert>
 
-	<select id="idCheck" resultType="int">
-		SELECT COUNT(*)
-		FROM MEMBERS
-		WHERE user_id = #{user_id}
-	</select>
+    <select id="idCheck" resultType="int">
+        SELECT COUNT(*)
+        FROM MEMBERS
+        WHERE user_id = #{user_id}
+    </select>
 
-	<select id="getMemberById" resultType="com.uhi.gourmet.member.MemberVO">
-		SELECT *
-		FROM MEMBERS
-		WHERE user_id = #{user_id}
-	</select>
+    <select id="getMemberById" resultType="com.uhi.gourmet.member.MemberVO">
+        SELECT 
+            user_id, user_pw, user_nm, user_email, user_tel, 
+            user_role, user_zip, user_addr1, user_addr2, 
+            user_lat, user_lon, enabled, user_regdate
+        FROM MEMBERS
+        WHERE user_id = #{user_id}
+    </select>
 
-	<update id="updateMember">
-		UPDATE MEMBERS
-		<set>
-			user_nm = #{user_nm},
-			user_email = #{user_email, jdbcType=VARCHAR},
-			user_tel = #{user_tel},
-			user_zip = #{user_zip, jdbcType=VARCHAR},
-			user_addr1 = #{user_addr1, jdbcType=VARCHAR},
-			user_addr2 = #{user_addr2, jdbcType=VARCHAR},
-			user_lat = #{user_lat, jdbcType=NUMERIC},
-			user_lon = #{user_lon, jdbcType=NUMERIC},
-			<if test="user_pw != null and user_pw != ''">
-				, user_pw = #{user_pw}
-			</if>
-		</set>
-		WHERE user_id = #{user_id}
-	</update>
+    <update id="updateMember">
+        UPDATE MEMBERS
+        <set>
+            <if test="user_nm != null">user_nm = #{user_nm},</if>
+            <if test="user_email != null">user_email = #{user_email, jdbcType=VARCHAR},</if>
+            <if test="user_tel != null">user_tel = #{user_tel},</if>
+            <if test="user_zip != null">user_zip = #{user_zip, jdbcType=VARCHAR},</if>
+            <if test="user_addr1 != null">user_addr1 = #{user_addr1, jdbcType=VARCHAR},</if>
+            <if test="user_addr2 != null">user_addr2 = #{user_addr2, jdbcType=VARCHAR},</if>
+            <if test="user_lat != null">user_lat = #{user_lat, jdbcType=NUMERIC},</if>
+            <if test="user_lon != null">user_lon = #{user_lon, jdbcType=NUMERIC},</if>
+            <if test="user_pw != null and user_pw != ''">
+                user_pw = #{user_pw}
+            </if>
+        </set>
+        WHERE user_id = #{user_id}
+    </update>
 
-	<delete id="deleteMember">
-		DELETE FROM MEMBERS
-		WHERE user_id = #{user_id}
-	</delete>
+    <delete id="deleteMember">
+        DELETE FROM MEMBERS
+        WHERE user_id = #{user_id}
+    </delete>
 
 </mapper>

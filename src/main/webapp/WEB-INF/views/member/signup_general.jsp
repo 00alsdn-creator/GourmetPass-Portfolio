@@ -19,6 +19,7 @@
                 <th>아이디</th>
                 <td>
                     <div class="input-row">
+                        <%-- 가입 페이지는 readonly가 아니므로 member-signup.js에서 중복확인을 강제함 [cite: 19] --%>
                         <input type="text" name="user_id" id="user_id" required placeholder="3글자 이상">
                         <button type="button" id="btnIdCheck" class="btn-wire">중복확인</button>
                     </div>
@@ -44,6 +45,29 @@
                 <th>전화번호</th>
                 <td><input type="text" name="user_tel" required placeholder="숫자만 입력" maxlength="13" oninput="autoHyphen(this)"></td>
             </tr>
+            
+            <%-- 이메일 인증 섹션 --%>
+            <tr>
+                <th>이메일</th>
+                <td>
+                    <div class="input-row">
+                        <input type="email" name="user_email" id="user_email" required placeholder="example@mail.com">
+                        <button type="button" id="btnEmailAuth" class="btn-wire">인증코드 발송</button>
+                    </div>
+                    <div id="emailMsg" class="msg-box"></div>
+                </td>
+            </tr>
+            <tr>
+                <th>인증코드</th>
+                <td>
+                    <div class="input-row">
+                        <input type="text" id="auth_code" disabled placeholder="인증코드 6자리" maxlength="6">
+                        <span id="timer" style="color:red; margin-left:10px; font-weight:bold;"></span>
+                    </div>
+                    <div id="authMsg" class="msg-box"></div>
+                </td>
+            </tr>
+
             <tr>
                 <th>주소</th>
                 <td>
@@ -59,17 +83,28 @@
         </table>
 
         <div class="btn-group">
-            <button type="submit" class="btn-submit">가입하기</button>
+            <button type="submit" class="btn-submit" id="btnSubmit">가입하기</button>
             <a href="${pageContext.request.contextPath}/" class="btn-cancel">취소</a>
         </div>
     </form>
 </div>
 
-<%-- 외부 API 및 리팩토링된 공통 스크립트 연결 --%>
+<%-- 외부 API 및 공통 스크립트 --%>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoJsKey}&libraries=services"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="<c:url value='/resources/js/address-api.js'/>"></script>
 <script src="<c:url value='/resources/js/common.js'/>"></script>
-<script src="<c:url value='/resources/js/member.js'/>"></script>
+
+<script type="text/javascript">
+    <%-- 전역 설정 객체 --%>
+    var APP_CONFIG = APP_CONFIG || {
+        contextPath: "${pageContext.request.contextPath}",
+        csrfName: "${_csrf.parameterName}",
+        csrfToken: "${_csrf.token}"
+    };
+</script>
+
+<%-- 통합된 가입/검증 스크립트 (member.js 중복 호출 금지) --%>
+<script src="<c:url value='/resources/js/member-signup.js'/>"></script>
 
 <jsp:include page="../common/footer.jsp" />

@@ -1,3 +1,4 @@
+<%-- WEB-INF/views/member/signup_owner1.jsp --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
@@ -40,6 +41,29 @@
                 <th>전화번호</th>
                 <td><input type="text" name="user_tel" required oninput="autoHyphen(this)" maxlength="13" placeholder="숫자만 입력"></td>
             </tr>
+
+            <%-- 이메일 인증 섹션 --%>
+            <tr>
+                <th>이메일</th>
+                <td>
+                    <div class="input-row">
+                        <input type="email" name="user_email" id="user_email" required placeholder="example@mail.com">
+                        <button type="button" id="btnEmailAuth" class="btn-wire">인증코드 발송</button>
+                    </div>
+                    <div id="emailMsg" class="msg-box"></div>
+                </td>
+            </tr>
+            <tr>
+                <th>인증코드</th>
+                <td>
+                    <div class="input-row">
+                        <input type="text" id="auth_code" disabled placeholder="인증코드 6자리" maxlength="6">
+                        <span id="timer" style="color:red; margin-left:10px; font-weight:bold;"></span>
+                    </div>
+                    <div id="authMsg" class="msg-box"></div>
+                </td>
+            </tr>
+
             <tr>
                 <th>거주지 주소</th>
                 <td>
@@ -61,10 +85,24 @@
     </form>
 </div>
 
-<script src="<c:url value='/resources/js/common.js'/>"></script>
-<script src="<c:url value='/resources/js/member.js'/>"></script>
+<%-- 외부 라이브러리 및 공통 스크립트 --%>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoJsKey}&libraries=services"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="<c:url value='/resources/js/address-api.js'/>"></script>
+<script src="<c:url value='/resources/js/common.js'/>"></script>
+
+<%-- [핵심] member.js 로드 제거: 통합된 member-signup.js와 충돌을 방지합니다 --%>
+
+<script type="text/javascript">
+    [cite_start]<%-- 전역 설정 객체: member-signup.js 실행 전에 선언되어야 함 [cite: 16] --%>
+    var APP_CONFIG = APP_CONFIG || {
+        contextPath: "${pageContext.request.contextPath}",
+        csrfName: "${_csrf.parameterName}",
+        csrfToken: "${_csrf.token}"
+    };
+</script>
+
+<%-- 통합된 가입/검증 스크립트 --%>
+<script src="<c:url value='/resources/js/member-signup.js'/>"></script>
 
 <jsp:include page="../common/footer.jsp" />

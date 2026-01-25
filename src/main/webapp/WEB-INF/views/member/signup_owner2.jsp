@@ -4,7 +4,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%> 
 
 <jsp:include page="../common/header.jsp" />
-<%-- [원칙 1] 기존에 완성된 통합 스타일시트만 연결 (추가 수정 없음) --%>
 <link rel="stylesheet" href="<c:url value='/resources/css/member.css'/>">
 
 <div class="edit-wrapper">
@@ -13,7 +12,7 @@
     
     <form action="${pageContext.request.contextPath}/member/signup/ownerFinal" method="post" id="ownerStep2Form">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-        <%-- 좌표 정보 저장용 숨김 필드 --%>
+        <%-- 좌표 정보 저장용 숨김 필드: DB 스키마 NUMBER(10, 7) 대응 [cite: 2] --%>
         <input type="hidden" name="store_lat" id="store_lat" value="0.0">
         <input type="hidden" name="store_lon" id="store_lon" value="0.0">
 
@@ -43,20 +42,19 @@
             <tr>
                 <th>가게 위치</th>
                 <td>
-                    <%-- [교정] 우편번호와 버튼을 input-row로 묶어 정렬 일치 --%>
                     <div class="input-row mb-10">
                         <input type="text" name="store_zip" id="store_zip" style="width:120px; flex:none;" readonly placeholder="우편번호">
                         <button type="button" onclick="execDaumPostcode('store')" class="btn-wire">위치 검색</button>
                     </div>
                     <input type="text" name="store_addr1" id="store_addr1" class="mb-10" readonly placeholder="기본 주소">
-                    <input type="text" name="user_addr2" id="user_addr2" placeholder="상세 주소를 입력하세요">
+                    <%-- [교정] name 속성을 user_addr2에서 store_addr2로 수정하여 DB 컬럼과 일치시킴 [cite: 2] --%>
+                    <input type="text" name="store_addr2" id="store_addr2" placeholder="상세 주소를 입력하세요">
                     <div id="coordStatus" class="msg-box msg-ok">정확한 위치 정보가 필요합니다.</div>
                 </td>
             </tr>
             <tr>
                 <th>영업 시간</th>
                 <td>
-                    <%-- [교정] 두 개의 select를 btn-group 구조로 배치하여 대칭 확보 --%>
                     <div class="btn-group" style="margin-top:0; align-items:center; gap:8px;">
                         <select name="open_time" style="flex:1;">
                             <c:forEach var="i" begin="0" end="23">
@@ -91,16 +89,26 @@
             </tr>
         </table>
 
-        <%-- [교정] 가로 전체 너비를 사용하는 메인 버튼 적용 --%>
         <button type="submit" class="btn-submit" style="width:100%; margin-top:30px;">가입 완료 및 가게 등록</button>
     </form>
 </div>
 
-<%-- [원칙 1] 외부 API 및 공통 스크립트 연결 --%>
+<%-- 외부 API 및 공통 스크립트 연동 --%>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoJsKey}&libraries=services"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="<c:url value='/resources/js/address-api.js'/>"></script>
 <script src="<c:url value='/resources/js/common.js'/>"></script>
-<script src="<c:url value='/resources/js/member.js'/>"></script>
+
+<%-- [교정] APP_CONFIG 선언 추가 (AJAX 및 경로 참조용) [cite: 16, 33] --%>
+<script type="text/javascript">
+    var APP_CONFIG = APP_CONFIG || {
+        contextPath: "${pageContext.request.contextPath}",
+        csrfName: "${_csrf.parameterName}",
+        csrfToken: "${_csrf.token}"
+    };
+</script>
+
+<%-- [교정] member.js를 제거하고 통합된 member-signup.js 연결 --%>
+<script src="<c:url value='/resources/js/member-signup.js'/>"></script>
 
 <jsp:include page="../common/footer.jsp" />

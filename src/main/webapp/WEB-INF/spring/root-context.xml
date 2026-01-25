@@ -44,5 +44,27 @@
 
 	<mybatis-spring:scan base-package="com.uhi.gourmet"
 		annotation="org.apache.ibatis.annotations.Mapper" />
+		
+	<!-- 이메일 인증을 위한 것 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com"/>
+		<property name="port" value="465"/>
+		<property name="username" value="boardexample114@gmail.com"/>
+		<property name="password" value="wmbj ktoa hihr wvhq"/>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.smtp.starttls.required">true</prop>
+				<prop key="mail.smtp.ssl.enable">true</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key="mail.smtp.ssl.trust">smtp.gmail.com</prop>
+				<prop key="mail.smtp.ssl.protocols">TLSv1.2</prop>
+				<prop key="mail.debug">true</prop>
+			</props>
+		</property>
+	</bean>
 
 </beans>

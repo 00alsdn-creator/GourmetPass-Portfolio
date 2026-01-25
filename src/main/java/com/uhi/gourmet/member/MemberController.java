@@ -1,13 +1,17 @@
-/* com/uhi/gourmet/member/MemberController.java */
 package com.uhi.gourmet.member;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Random; // 난수 생성을 위해 추가
+
+import javax.mail.internet.MimeMessage; // 메일 전송을 위해 추가
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSenderImpl; // 메일 발송 객체 주입을 위해 추가
+import org.springframework.mail.javamail.MimeMessageHelper; // 메일 작성을 위해 추가
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,10 +27,13 @@ import com.uhi.gourmet.wait.WaitService;
 import com.uhi.gourmet.store.StoreMapper;
 import com.uhi.gourmet.store.StoreVO;
 import com.uhi.gourmet.review.ReviewService; 
-import com.uhi.gourmet.review.ReviewVO;      
+import com.uhi.gourmet.review.ReviewVO;
+
+import lombok.extern.log4j.Log4j2; // 로그 출력을 위해 추가
 
 @Controller
 @RequestMapping("/member")
+@Log4j2 // 로그 사용 활성화
 public class MemberController {
 
     @Autowired
@@ -44,12 +51,57 @@ public class MemberController {
     @Autowired
     private ReviewService review_service; 
 
+    // root-context.xml에 등록된 mailSender 주입
+    @Autowired
+    private JavaMailSenderImpl mailSender;
+
     @Value("${kakao.js.key}")
     private String kakaoJsKey;
 
     private void addKakaoKeyToModel(Model model) {
         model.addAttribute("kakaoJsKey", kakaoJsKey);
     }
+
+    // --- 팀원의 이메일 인증 로직 병합 시작 ---
+    @PostMapping("/emailAuth")
+    @ResponseBody
+    public int emailAuth(@RequestParam("email") String email) {
+
+        log.info("이메일 인증 요청 수신: " + email);
+
+        // 111111 ~ 999999 범위의 6자리 난수 생성
+        Random random = new Random();
+        int checkNum = random.nextInt(888888) + 111111;
+
+        // 이메일 보낼 양식 설정
+        String setFrom = "boardexample114@gmail.com"; // root-context.xml에 설정된 계정
+        String toMail = email;
+        String title = "Gourmet 회원가입 인증 이메일입니다.";
+        String content = "GourmetPass를 이용해주셔서 감사합니다." +
+                         "<br><br>" +
+                         "인증 코드는 <b>" + checkNum + "</b> 입니다." +
+                         "<br>" +
+                         "해당 인증 코드를 인증 코드 확인란에 기입하여 주세요.";
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage(); // Spring 제공 Mail API
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
+            
+            helper.setFrom(setFrom);
+            helper.setTo(toMail);
+            helper.setSubject(title);
+            helper.setText(content, true); // true는 HTML 사용 설정
+            
+            mailSender.send(message);
+            log.info("인증 메일 전송 성공: " + checkNum);
+        } catch (Exception e) {
+            log.error("메일 전송 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return checkNum; // 클라이언트(JS)에서 대조할 수 있도록 난수 반환
+    }
+    // --- 팀원의 이메일 인증 로직 병합 종료 ---
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error, Model model) {
@@ -130,7 +182,6 @@ public class MemberController {
         }
     }
 
-    /* [오류 해결] 404 에러 방지를 위해 실제 파일 위치인 wait 폴더를 지정합니다. */
     @GetMapping("/wait_status")
     public String myStatus(Principal principal, Model model) {
         if (principal == null) return "redirect:/member/login";
@@ -138,7 +189,6 @@ public class MemberController {
         String user_id = principal.getName();
         model.addAllAttributes(memberService.getMyStatusSummary(user_id));
         
-        // wait 폴더 내의 wait_status.jsp를 호출하도록 수정
         return "wait/wait_status"; 
     }
 
