@@ -143,7 +143,7 @@
 									</c:when>
 									<c:when test="${book.book_status == 'ING'}">
 										<button type="submit" name="status" value="FINISH"
-											class="btn-step btn-finish">식사 확인</button>
+											class="btn-step btn-finish confirm-btn" data-payid="${book.pay_id}">식사 확인</button>
 									</c:when>
 									<c:otherwise>
 										<span class="management-end">관리 종료</span>

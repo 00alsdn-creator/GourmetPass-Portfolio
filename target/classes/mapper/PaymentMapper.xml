@@ -6,7 +6,7 @@
 	<insert id="insertPayment">
 		 INSERT INTO PAY (
         PAY_ID,
-        IMP_UID,
+        IMP_UID, 
         AMOUNT,
         PAY_DATE) 
         VALUES (

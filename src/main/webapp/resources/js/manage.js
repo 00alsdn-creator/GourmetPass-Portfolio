@@ -20,8 +20,21 @@ $(document).ready(function() {
         }
         
     });
+    
+    
+    $(".confirm-btn").on("click", function() {
+        const pay_id = $(this).data("payid");   // 버튼에 심어둔 pay_id 가져오기
+        const form = $(this).closest("form");   // 부모 폼 요소
+
+        if (confirm("식사완료 처리하시겠습니까? 결제된 금액이 환불됩니다.")) {
+            // 1. 환불 함수 호출
+            cancelPay(pay_id, form);
+            // 취소 누르면 그냥 끝
+        }
+        
+    });
 });
-    // 노쇼시의 환불 로직 JAVASCRIPT
+    // 식사완료, 노쇼시의 환불 로직 JAVASCRIPT
 function cancelPay(pay_id, form) {	// pay_id 를 매개변수로 가져와서
     $.ajax({
         "url": APP_CONFIG.contextPath+"/pay/api/v1/payment/refund",

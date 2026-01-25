@@ -68,6 +68,10 @@ public class StoreController {
             @RequestParam(value = "region", required = false) String region,
             @RequestParam(value = "keyword", required = false) String keyword,
             Model model) {
+    	
+    	System.out.println(category);
+    	System.out.println(region);
+    	System.out.println(keyword);
         
         List<StoreVO> storeList = storeService.getStoreList(category, region, keyword);
         model.addAttribute("storeList", storeList); 

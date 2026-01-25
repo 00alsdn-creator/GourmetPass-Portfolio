@@ -26,11 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/pay")
 public class PayController {
 
-//	@Autowired
-//	private MapperTest mapper;
 	
 	@Autowired
 	private PaymentService service;
+	
 
 	/* sample */
 //	@GetMapping("/rest")
@@ -48,8 +47,6 @@ public class PayController {
 	@PostMapping("/api/v1/payment/complete")
 	public ResponseEntity<?> paymentVal(@RequestParam String impUid, String apiKey, String apiSecret) throws IamportResponseException, IOException{
 		System.out.println("Controller paymentVal()..................");
-		
-		
 		
 		if(service.paymentVal(impUid)) {
 			int payId = service.getPayIdByImpUid(impUid);	// impUid로 payId를 가져옴
