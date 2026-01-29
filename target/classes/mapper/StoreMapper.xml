@@ -20,7 +20,7 @@
     <select id="getListStore" resultType="com.uhi.gourmet.store.StoreVO">
         <![CDATA[
         SELECT * FROM (
-            SELECT /*+ INDEX_DESC(STORE PK_STORE) */
+            SELECT
                 rownum AS rn, 
                 inner_s.*
             FROM (

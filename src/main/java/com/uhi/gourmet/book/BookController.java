@@ -114,14 +114,17 @@ public class BookController {
 	}
 	
 	@PostMapping("/register")
-	public String register_book(BookVO vo, Principal principal, @RequestParam("store_id") int store_id,
+	public String register_book(Principal principal, @RequestParam("store_id") int store_id,
 			@RequestParam("book_date") String date, @RequestParam("book_time") String time,
+			@RequestParam("pay_id") String pay_id,
 			@RequestParam(value = "people_cnt", defaultValue = "1") int people_cnt,
 			@RequestParam(value = "book_price", required = false, defaultValue = "0") int book_price,
 			RedirectAttributes rttr) {
+		System.out.println("Book register Controller...");
 		
 		if (principal == null) return "redirect:/member/login";
-	    
+		
+		BookVO vo = new BookVO();
 	    // 1. 여기서 문자열일 때 미리 합쳐서 Date 객체로 만듭니다.
 	    try {
 	        String fullDateStr = date + " " + time; // "2026-01-21 17:00"
@@ -136,6 +139,7 @@ public class BookController {
 	    vo.setStore_id(store_id);
 	    vo.setPeople_cnt(people_cnt);
 	    vo.setBook_time(time);
+	    vo.setPay_id(Integer.parseInt(pay_id));
 	    
 	    book_service.register_book(vo);
 	    rttr.addFlashAttribute("msg", "예약이 완료되었습니다.");

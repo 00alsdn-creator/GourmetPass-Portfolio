@@ -129,33 +129,78 @@ $(document).ready(function() {
 	    $("#selectedTime").val($(this).data("time")); 
     });
 
-    // 4. 예약 및 결제 프로세스
+     // [4] 예약 폼 제출 핸들러 (중복 체크 -> 결제 -> 제출)
     $("#bookForm").on("submit", function(e) {
         e.preventDefault();
         const form = this;
         const selectedTime = $("#selectedTime").val();
-        if(!selectedTime) { alert("방문 시간을 선택해 주세요!"); return; }
+        const bookDate = $("#bookDate").val();
+        const storeId = $("input[name='store_id']").val();
+        const contextPath = app.dataset.context;
+        
 
-        if(!confirm("예약을 위해 결제를 진행하시겠습니까?")) return;
+        if(!selectedTime) {
+            alert("방문 시간을 선택해 주세요!");
+            return;
+        }
+        // [Step 1] 예약 중복 체크
+        $.ajax({
+            url: contextPath + "/book/api/checkDuplicate",
+            type: "GET",
+            data: { store_id: storeId, book_date: bookDate, book_time: selectedTime },
+            success: function(result) {
+                if (result === "AVAILABLE") {
+                    if(!confirm(bookDate + " " + selectedTime + " 예약을 위해 결제를 진행하시겠습니까?")) return;
 
-        // 아임포트 결제 호출
-        const IMP = window.IMP;
-        IMP.init(window.loginUserInfo.impInit);
-        IMP.request_pay({
-            pg: window.loginUserInfo.pg,
-            pay_method: "card",
-            merchant_uid: "pay-" + new Date().getTime(),
-            name: "예약 보증금",
-            amount: 1,
-            buyer_email: window.loginUserInfo.email,
-            buyer_name:  window.loginUserInfo.name
-        }, function (response) {
-            if (response.success) {
-                $("#payIdField").val(response.imp_uid);
-                alert("결제가 완료되었습니다!");
-                form.submit(); 
-            } else {
-                alert("결제 실패: " + response.error_msg);
+                    // [Step 2] 아임포트 결제창 호출
+                    const IMP = window.IMP;
+                    IMP.init(loginUserInfo.impInit);	// properties 변수 할당
+                    IMP.request_pay({
+                        pg: loginUserInfo.pg,	// properties 변수 할당
+                        pay_method: "card",
+                        merchant_uid: "pay-" + new Date().getTime(),
+                        name: "예약 보증금",
+                        amount: 1,
+                        buyer_email: loginUserInfo.email,
+					    buyer_name:  loginUserInfo.name,
+					    buyer_tel:   loginUserInfo.tel,
+					    buyer_addr:  loginUserInfo.addr,
+					    buyer_postcode: "1111"
+                    }, function (response) {
+                        if (response.success) {
+                            // [Step 3] 결제 성공 시 서버 검증 (POST + CSRF)
+                            $.ajax({
+                                url: contextPath + '/pay/api/v1/payment/complete',
+                                type: 'POST',
+                                data: { impUid: response.imp_uid },
+                                beforeSend: function(xhr) {
+                                    // Header.jsp의 APP_CONFIG에서 CSRF 토큰 가져오기
+                                    if(typeof APP_CONFIG !== 'undefined') {
+                                        xhr.setRequestHeader("X-CSRF-TOKEN", APP_CONFIG.csrfToken);
+                                    }
+                                }
+                            }).done(function(payId) {
+                                $("#payIdField").val(payId);
+                                alert("결제가 완료되었습니다!");
+                                form.submit(); // 컨트롤러로 최종 폼 전송
+                            }).fail(function() {
+                                alert("결제 검증에 실패했습니다. 관리자에게 문의하세요.");
+                            });
+                        } else {
+                            alert("결제가 취소되었습니다: " + response.error_msg);
+                        }
+                    });
+                } else if (result === "DUPLICATE_TIME") {
+                    alert("죄송합니다. 그 사이에 예약이 마감되었습니다.");
+                    window.loadAvailableSlots();
+                } else if (result === "DUPLICATE_USER") {
+                    alert("해당 날짜에 이미 예약 내역이 존재합니다.");
+                } else {
+                    alert("예약 정보를 확인하는 중 문제가 발생했습니다.");
+                }
+            },
+            error: function() {
+                alert("서버 통신 중 오류가 발생했습니다.");
             }
         });
     });
