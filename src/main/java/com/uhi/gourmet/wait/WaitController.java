@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.uhi.gourmet.member.MemberService;
 
 @Controller
 @RequestMapping("/wait")
@@ -17,6 +18,9 @@ public class WaitController {
 
     @Autowired
     private WaitService wait_service;
+    
+    @Autowired
+    private MemberService member_service;
 
     @Autowired
     private SimpMessagingTemplate messaging_template;
@@ -33,7 +37,7 @@ public class WaitController {
         String user_id = principal.getName();
         
         // 서비스 계층에서 가공된 모든 상태 데이터를 한 번에 모델에 추가
-        model.addAllAttributes(wait_service.getMyStatusSummary(user_id));
+        model.addAllAttributes(member_service.getMyStatusSummary(user_id));
         
         return "wait/wait_status";
     }

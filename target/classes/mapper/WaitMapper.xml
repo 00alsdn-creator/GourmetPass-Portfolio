@@ -54,9 +54,10 @@
 	</update>
 
 	<select id="selectWaitDetail"
-		resultType="com.uhi.gourmet.wait.WaitVO">
-		SELECT * FROM WAITING
-		WHERE wait_id = #{wait_id}
+	    resultType="com.uhi.gourmet.wait.WaitVO">
+	    SELECT *
+	    FROM WAIT
+	    WHERE wait_id = #{wait_id}
 	</select>
 
 	<select id="existsWaitingToday" resultType="int">
@@ -67,6 +68,18 @@
 		AND wait_status = 'WAITING'
 		AND TRUNC(wait_date) = TRUNC(SYSDATE)
 	</select>
+		
+<select id="selectTeamsAhead" resultType="int">
+  SELECT COUNT(*)
+  FROM WAIT
+  WHERE store_id = #{store_id}
+    AND TRUNC(wait_date) = TRUNC(SYSDATE)
+    AND wait_status = 'WAITING'
+    AND wait_num &lt; #{wait_num}
+</select>
+
+		
 	
+		
 
 </mapper>

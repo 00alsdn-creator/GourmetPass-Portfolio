@@ -65,41 +65,13 @@ public class WaitServiceImpl implements WaitService {
     public void update_wait_status(int wait_id, String status) {
         wait_mapper.updateWaitStatus(wait_id, status);
     }
-
-    // [수정 포인트: Controller의 비즈니스 로직(필터링, 요약) 이전]
+    
+    
     @Override
-    public Map<String, Object> getMyStatusSummary(String userId) {
-        Map<String, Object> summary = new HashMap<>();
-        
-        List<WaitVO> my_wait_list = wait_mapper.selectMyWaitList(userId);
-        List<BookVO> my_book_list = book_service.get_my_book_list(userId);
-        
-        if (my_wait_list == null) my_wait_list = new ArrayList<>();
-        if (my_book_list == null) my_book_list = new ArrayList<>();
-
-        // 1. 진행 중인 내역 필터링
-        summary.put("activeWait", my_wait_list.stream()
-                .filter(w -> "WAITING".equals(w.getWait_status()) || "CALLED".equals(w.getWait_status()))
-                .findFirst().orElse(null));
-        
-        summary.put("activeBook", my_book_list.stream()
-                .filter(b -> "RESERVED".equals(b.getBook_status()))
-                .findFirst().orElse(null));
-
-        // 2. 리뷰 작성이 가능한 완료 내역(FINISH) 추출
-        summary.put("finishedWaits", my_wait_list.stream()
-                .filter(w -> "FINISH".equals(w.getWait_status()))
-                .collect(Collectors.toList()));
-        
-        summary.put("finishedBooks", my_book_list.stream()
-                .filter(b -> "FINISH".equals(b.getBook_status()))
-                .collect(Collectors.toList()));
-
-        summary.put("my_wait_list", my_wait_list);
-        summary.put("my_book_list", my_book_list);
-        
-        return summary;
+    public int getTeamsAheadToday(int store_id, int wait_num) {
+        return wait_mapper.selectTeamsAhead(store_id, wait_num);
     }
+
 
     /**
      * [추가] 특정 웨이팅의 상세 정보를 가져오는 메서드

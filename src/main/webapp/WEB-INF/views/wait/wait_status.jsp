@@ -208,6 +208,13 @@ APP_CONFIG.activeStoreId = "${not empty activeWait ? activeWait.store_id : (not 
 									<c:when test="${activeWait.wait_status == 'CALLED'}">
 										<span class="badge-wire badge-call">📢 입장 호출!</span>
 									</c:when>
+
+									<c:when
+										test="${activeWait.wait_status == 'WAITING' and aheadCount == 0}">
+										<span class="badge-wire badge-call">🚀 곧 입장!</span>
+									</c:when>
+
+
 									<c:otherwise>
 										<span class="badge-wire">🚶 웨이팅 중</span>
 									</c:otherwise>
@@ -218,7 +225,9 @@ APP_CONFIG.activeStoreId = "${not empty activeWait ? activeWait.store_id : (not 
 										<c:when test="${activeWait.wait_status == 'ING'}">
 											<span class="dining-msg">맛있는 식사 되세요!</span>
 										</c:when>
-										<c:otherwise>대기 번호: <b style="color: #ff3d00;">${activeWait.wait_num}번</b> / ${activeWait.people_cnt}명</c:otherwise>
+										<c:otherwise>대기 번호: <b style="color: #ff3d00;">${activeWait.wait_num}번</b>
+											<c:if test="${not empty aheadCount}">(내 앞 <b
+													style="color: #ff3d00;">${aheadCount}</b>팀)</c:if> / ${activeWait.people_cnt}명</c:otherwise>
 									</c:choose>
 								</p>
 							</div>
