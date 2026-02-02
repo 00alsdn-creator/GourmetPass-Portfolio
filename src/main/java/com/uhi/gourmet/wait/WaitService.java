@@ -10,11 +10,14 @@ public interface WaitService {
     List<WaitVO> get_my_wait_list(String user_id);
     List<WaitVO> get_store_wait_list(int store_id);
     void update_wait_status(int wait_id, String status);
-    Map<String, Object> getMyStatusSummary(String userId);
+    //Map<String, Object> getMyStatusSummary(String userId);
 
     // [추가] 특정 웨이팅 상세 정보 조회 (Controller에서 호출함)
     WaitVO get_wait_detail(int wait_id); 
     
- // [추가] 오늘 중복 웨이팅 체크
+    // [추가] 오늘 중복 웨이팅 체크
    boolean hasWaitingToday(String user_id, int store_id);
+   
+   // 내 앞 대기팀 수 알기 위해
+   int getTeamsAheadToday(int store_id, int wait_num);
 }

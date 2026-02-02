@@ -122,6 +122,14 @@ public class MemberServiceImpl implements MemberService {
         summary.put("activeBook", my_book_list.stream()
             .filter(b -> "RESERVED".equals(b.getBook_status()) || "ING".equals(b.getBook_status()))
             .findFirst().orElse(null));
+        
+        // 내 앞 대기팀 수 계산 (여기에!)
+        // activeWait를 먼저 꺼냄
+        WaitVO activeWait = (WaitVO) summary.get("activeWait");
+        if (activeWait != null && ("WAITING".equals(activeWait.getWait_status()) || "CALLED".equals(activeWait.getWait_status()))) {
+            int aheadCount = wait_service.getTeamsAheadToday(activeWait.getStore_id(), activeWait.getWait_num());
+            summary.put("aheadCount", aheadCount);
+        }
 
         // 2. 방문 완료 히스토리 추출 (FINISH 상태)
         List<WaitVO> finishedWaits = my_wait_list.stream()

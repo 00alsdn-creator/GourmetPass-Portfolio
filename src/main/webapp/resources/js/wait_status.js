@@ -46,4 +46,31 @@ function cancelPay(pay_id, form) {	// pay_id 를 매개변수로 가져와서
         }	
     });
 }
+
     
+function cancelWait(waitId) {
+  if (!confirm("웨이팅을 취소하시겠습니까?")) return;
+
+  const url = APP_CONFIG.contextPath + "/wait/cancel";
+  console.log("CANCEL URL =", url, "waitId =", waitId);
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRF-TOKEN": APP_CONFIG.csrfToken
+    },
+    body: new URLSearchParams({ wait_id: String(waitId) })
+  })
+  .then(res => {
+    console.log("cancel status =", res.status);
+    if (!res.ok) throw new Error("취소 실패: " + res.status);
+    alert("웨이팅이 취소되었습니다!");
+    location.reload();
+  })
+  .catch(err => {
+    console.error(err);
+    alert(err.message);
+  });
+}
+

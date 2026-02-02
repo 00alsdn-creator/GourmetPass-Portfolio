@@ -38,4 +38,10 @@ public interface WaitMapper {
             @Param("user_id") String user_id,
             @Param("store_id") int store_id
         );
+    
+    int selectTeamsAhead(
+    		@Param("store_id") int store_id, 
+    		@Param("wait_num") int wait_num);
+
+
 }
