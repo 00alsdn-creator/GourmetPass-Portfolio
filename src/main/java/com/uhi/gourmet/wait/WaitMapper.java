@@ -42,6 +42,8 @@ public interface WaitMapper {
     int selectTeamsAhead(
     		@Param("store_id") int store_id, 
     		@Param("wait_num") int wait_num);
-
+    
+    // 여러가게 동시 웨이팅 방지
+    int existsUserActiveWaiting(@Param("user_id") String user_id);
 
 }

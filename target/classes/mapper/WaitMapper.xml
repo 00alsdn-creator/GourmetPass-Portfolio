@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.uhi.gourmet.wait.WaitMapper">
 
+	
+	<select id="existsUserActiveWaiting" resultType="int">
+		SELECT COUNT(*)
+		FROM WAIT
+		WHERE user_id = #{user_id}
+		AND wait_status IN ('WAITING', 'CALLED')
+	</select>
+
+
 	<insert id="insertWait">
 		INSERT INTO WAIT (wait_id, user_id, store_id,
 		people_cnt, wait_num,

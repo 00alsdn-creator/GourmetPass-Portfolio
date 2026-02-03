@@ -28,23 +28,23 @@ public class WaitServiceImpl implements WaitService {
     public boolean hasWaitingToday(String user_id, int store_id) {
         return wait_mapper.existsWaitingToday(user_id, store_id) > 0;
     }
-    
+
     @Override
     public synchronized void register_wait(WaitVO vo) {
-    	
-        // 오늘 중복 웨이팅 체크
-        if (wait_mapper.existsWaitingToday(vo.getUser_id(), vo.getStore_id()) > 0) {
-            throw new IllegalStateException("이미 오늘 웨이팅이 있습니다.");
+
+        //  지금 진행 중인 웨이팅이 있으면 금지
+        if (wait_mapper.existsUserActiveWaiting(vo.getUser_id()) > 0) {
+            throw new IllegalStateException("이미 진행 중인 웨이팅이 있습니다.");
         }
 
-        // 오늘 가게별 다음 번호 계산
-        Integer max_num = wait_mapper.selectMaxWaitNum(vo.getStore_id());
-        int next_num = (max_num == null) ? 1 : max_num + 1;
-        vo.setWait_num(next_num);
+        // 가게별 오늘 번호는 그대로
+        Integer maxNum = wait_mapper.selectMaxWaitNum(vo.getStore_id());
+        int nextNum = (maxNum == null) ? 1 : maxNum + 1;
+        vo.setWait_num(nextNum);
 
-        // 등록
         wait_mapper.insertWait(vo);
     }
+
 
     @Override
     public int get_current_wait_count(int store_id) {

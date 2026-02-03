@@ -165,7 +165,7 @@ rotate(
 APP_CONFIG.userId = "<sec:authentication property='principal.username'/>";
 APP_CONFIG.activeStoreId = "${not empty activeWait ? activeWait.store_id : (not empty activeBook ? activeBook.store_id : '')}";
     function connectRealtime() {
-        const socket = new SockJS(APP_CONFIG.contextPath + '/ws');
+        const socket = new SockJS(APP_CONFIG.contextPath + '/ws_waiting');
         const stompClient = Stomp.over(socket);
         stompClient.debug = null;
 
