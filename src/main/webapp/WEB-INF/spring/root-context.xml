@@ -7,11 +7,9 @@
 	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/jdbc 
-		http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
-	<context:property-placeholder
-		location="classpath:api.properties" />
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
+	<context:property-placeholder location="classpath:api.properties" />
 
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 		<property name="driverClassName" value="${db.driver}" />
@@ -20,32 +18,24 @@
 		<property name="password" value="${db.password}" />
 	</bean>
 
-	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
-		destroy-method="close">
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
 		<constructor-arg ref="hikariConfig" />
 	</bean>
 
-	<bean id="sqlSessionFactory"
-		class="org.mybatis.spring.SqlSessionFactoryBean">
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<property name="mapperLocations"
-			value="classpath:mapper/**/*.xml" />
-		<property name="typeAliasesPackage" value="com.uhi.gourmet" />
+		<property name="mapperLocations" value="classpath:mapper/**/*.xml" />
+		<property name="typeAliasesPackage" value="com.uhi.gourmet.member, com.uhi.gourmet.store, com.uhi.gourmet.book, com.uhi.gourmet.wait" />
 	</bean>
 	
-	<!-- sql 실행을 위한 것 -->
-	<jdbc:initialize-database
-		data-source="dataSource" ignore-failures="ALL">
+	<jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
 		<jdbc:script location="classpath:data.sql" encoding="UTF-8"/>
 	</jdbc:initialize-database>
 
-	<context:component-scan
-		base-package="com.uhi.gourmet" />
+	<context:component-scan base-package="com.uhi.gourmet" />
 
-	<mybatis-spring:scan base-package="com.uhi.gourmet"
-		annotation="org.apache.ibatis.annotations.Mapper" />
+	<mybatis-spring:scan base-package="com.uhi.gourmet" annotation="org.apache.ibatis.annotations.Mapper" />
 		
-	<!-- 이메일 인증을 위한 것 -->
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="smtp.gmail.com"/>
 		<property name="port" value="465"/>
