@@ -45,7 +45,7 @@
 	<div class="dashboard-card">
 		<div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
 			<%-- [수정] 컨트롤러에서 전달받은 전체 개수(total_review_cnt) 표시 --%>
-			<h3 class="card-title">💬 최근 리뷰 기록 (${total_review_cnt})</h3>
+			<h3 class="card-title">💬 최근 리뷰&nbsp;&nbsp;</h3>
 			
 			<%-- [추가] 전체보기 링크: 신규 생성할 전체 이력 페이지(/member/review/mine)로 연결 --%>
 			<a href="<c:url value='/member/review/mine'/>" class="btn-wire" 
@@ -55,8 +55,8 @@
 		<div class="review-list">
 			<c:choose>
 				<c:when test="${not empty my_review_list}">
-					<c:forEach var="review" items="${my_review_list}">
-						<%-- 컨트롤러에서 3개만 리스트에 담아 보내주므로 상위 3개만 자동 출력됨 --%>
+					<c:forEach var="review" items="${my_review_list}" begin="0" end="1">
+						<%-- 최근 2개까지만 표시 --%>
 						<div class="item-card">
 							<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
 								<div class="store-link-box">

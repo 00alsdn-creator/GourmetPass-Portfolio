@@ -32,68 +32,70 @@
 			</span>
 		</div>
 
-		<table class="manage-dashboard-table">
-			<thead>
-				<tr>
-					<th class="col-num">번호</th>
-					<th class="col-userid">고객ID</th>
-					<th class="col-people">인원</th>
-					<th class="col-status">상태</th>
-					<th class="col-action">상태 제어</th>
-				</tr>
-			</thead>
-			<tbody>
-				<c:forEach var="wait" items="${store_wait_list}">
-					<%-- 관리 종료된 건은 제외하고 노출 --%>
-					<c:if
-						test="${wait.wait_status != 'FINISH' and wait.wait_status != 'CANCELLED'}">
-						<tr>
-							<td align="center"><b>${wait.wait_num}번</b></td>
-							<td align="center">${wait.user_id}</td>
-							<td align="center">${wait.people_cnt}명</td>
-							<td align="center"><c:choose>
-									<c:when test="${wait.wait_status == 'WAITING'}">
-										<span class="badge-wire">대기중</span>
-									</c:when>
-									<c:when test="${wait.wait_status == 'CALLED'}">
-										<span class="badge-wire badge-called">호출중</span>
-									</c:when>
-									<c:when test="${wait.wait_status == 'ING'}">
-										<span class="badge-wire badge-ing">식사중</span>
-									</c:when>
-								</c:choose></td>
-							<td align="center">
-								<form action="<c:url value='/wait/updateStatus'/>" method="post" class="action-btn-group">
-									<input type="hidden" name="wait_id" value="${wait.wait_id}">
-									<input type="hidden" name="user_id" value="${wait.user_id}">
-									<input type="hidden" name="${_csrf.parameterName}"
-										value="${_csrf.token}" />
-
-									<c:choose>
+		<div class="table-scroll">
+			<table class="manage-dashboard-table">
+				<thead>
+					<tr>
+						<th class="col-num">번호</th>
+						<th class="col-userid">고객ID</th>
+						<th class="col-people">인원</th>
+						<th class="col-status">상태</th>
+						<th class="col-action">상태 제어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:forEach var="wait" items="${store_wait_list}">
+						<%-- 관리 종료된 건은 제외하고 노출 --%>
+						<c:if
+							test="${wait.wait_status != 'FINISH' and wait.wait_status != 'CANCELLED'}">
+							<tr>
+								<td align="center"><b>${wait.wait_num}번</b></td>
+								<td align="center">${wait.user_id}</td>
+								<td align="center">${wait.people_cnt}명</td>
+								<td align="center"><c:choose>
 										<c:when test="${wait.wait_status == 'WAITING'}">
-											<button type="submit" name="status" value="CALLED"
-												class="btn-step btn-step-primary">지금 호출하기</button>
-											<button type="submit" name="status" value="CANCELLED"
-												class="btn-step btn-step-danger">취소</button>
+											<span class="badge-wire">대기중</span>
 										</c:when>
 										<c:when test="${wait.wait_status == 'CALLED'}">
-											<button type="submit" name="status" value="ING"
-												class="btn-step btn-step-next">입장 확인</button>
-											<button type="submit" name="status" value="CANCELLED"
-												class="btn-step btn-step-danger">노쇼 처리</button>
+											<span class="badge-wire badge-called">호출중</span>
 										</c:when>
 										<c:when test="${wait.wait_status == 'ING'}">
-											<button type="submit" name="status" value="FINISH"
-												class="btn-step btn-finish">식사 확인</button>
+											<span class="badge-wire badge-ing">식사중</span>
 										</c:when>
-									</c:choose>
-								</form>
-							</td>
-						</tr>
-					</c:if>
-				</c:forEach>
-			</tbody>
-		</table>
+									</c:choose></td>
+								<td align="center">
+									<form action="<c:url value='/wait/updateStatus'/>" method="post" class="action-btn-group">
+										<input type="hidden" name="wait_id" value="${wait.wait_id}">
+										<input type="hidden" name="user_id" value="${wait.user_id}">
+										<input type="hidden" name="${_csrf.parameterName}"
+											value="${_csrf.token}" />
+
+										<c:choose>
+											<c:when test="${wait.wait_status == 'WAITING'}">
+												<button type="submit" name="status" value="CALLED"
+													class="btn-step btn-step-primary">지금 호출하기</button>
+												<button type="submit" name="status" value="CANCELLED"
+													class="btn-step btn-step-danger">취소</button>
+											</c:when>
+											<c:when test="${wait.wait_status == 'CALLED'}">
+												<button type="submit" name="status" value="ING"
+													class="btn-step btn-step-next">입장 확인</button>
+												<button type="submit" name="status" value="CANCELLED"
+													class="btn-step btn-step-danger">노쇼 처리</button>
+											</c:when>
+											<c:when test="${wait.wait_status == 'ING'}">
+												<button type="submit" name="status" value="FINISH"
+													class="btn-step btn-finish">식사 확인</button>
+											</c:when>
+										</c:choose>
+									</form>
+								</td>
+							</tr>
+						</c:if>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
 	</div>
 
 	<%-- 2. 오늘 예약 섹션 --%>
@@ -125,57 +127,59 @@
 	        </c:if>
 	    </div>
 		
-		<table class="manage-dashboard-table">
-			<thead>
-				<tr>
-					<th class="col-num">시간</th>
-					<th class="col-userid">고객ID</th>
-					<th class="col-people">인원</th>
-					<th class="col-status">상태</th>
-					<th class="col-action">상태 제어</th>
-				</tr>
-			</thead>
-			<tbody>
-				<c:forEach var="book" items="${store_book_list}">
+		<div class="table-scroll">
+			<table class="manage-dashboard-table">
+				<thead>
 					<tr>
-						<td align="center"><b><fmt:formatDate
-									value="${book.book_date}" pattern="HH:mm" /></b></td>
-						<td align="center">${book.user_id}</td>
-						<td align="center">${book.people_cnt}명</td>
-						<td align="center"><span
-							class="badge-wire ${book.book_status == 'ING' ? 'badge-ing' : ''}">
-								${book.book_status == 'RESERVED' ? '예약확정' : (book.book_status == 'ING' ? '식사중' : book.book_status)}
-						</span></td>
-						<td align="center">
-							<form action="<c:url value='/book/updateStatus'/>" method="post"
-								class="action-btn-group">
-								<input type="hidden" name="book_id" value="${book.book_id}">
-								<input type="hidden" name="user_id" value="${book.user_id}">
-								<input type="hidden" name="${_csrf.parameterName}"
-									value="${_csrf.token}" />
-
-								<c:choose>
-									<c:when test="${book.book_status == 'RESERVED'}">
-										<button type="submit" name="status" value="ING"
-											class="btn-step btn-step-next">입장 확인</button>
-										<!-- 노쇼 버튼에 pay_id를 넣어 환불기능을 하기 위해 javascript에 보냄 -->
-										<button type="button" name="status" value="NOSHOW"
-											class="btn-step btn-step-danger noshow-btn" data-payid="${book.pay_id}">노쇼 처리</button>
-									</c:when>
-									<c:when test="${book.book_status == 'ING'}">
-										<button type="submit" name="status" value="FINISH"
-											class="btn-step btn-finish confirm-btn" data-payid="${book.pay_id}">식사 확인</button>
-									</c:when>
-									<c:otherwise>
-										<span class="management-end">관리 종료</span>
-									</c:otherwise>
-								</c:choose>
-							</form>
-						</td>
+						<th class="col-num">시간</th>
+						<th class="col-userid">고객ID</th>
+						<th class="col-people">인원</th>
+						<th class="col-status">상태</th>
+						<th class="col-action">상태 제어</th>
 					</tr>
-				</c:forEach>
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					<c:forEach var="book" items="${store_book_list}">
+						<tr>
+							<td align="center"><b><fmt:formatDate
+										value="${book.book_date}" pattern="HH:mm" /></b></td>
+							<td align="center">${book.user_id}</td>
+							<td align="center">${book.people_cnt}명</td>
+							<td align="center"><span
+								class="badge-wire ${book.book_status == 'ING' ? 'badge-ing' : ''}">
+									${book.book_status == 'RESERVED' ? '예약확정' : (book.book_status == 'ING' ? '식사중' : book.book_status)}
+							</span></td>
+							<td align="center">
+								<form action="<c:url value='/book/updateStatus'/>" method="post"
+									class="action-btn-group">
+									<input type="hidden" name="book_id" value="${book.book_id}">
+									<input type="hidden" name="user_id" value="${book.user_id}">
+									<input type="hidden" name="${_csrf.parameterName}"
+										value="${_csrf.token}" />
+
+									<c:choose>
+										<c:when test="${book.book_status == 'RESERVED'}">
+											<button type="submit" name="status" value="ING"
+												class="btn-step btn-step-next">입장 확인</button>
+											<!-- 노쇼 버튼에 pay_id를 넣어 환불기능을 하기 위해 javascript에 보냄 -->
+											<button type="button" name="status" value="NOSHOW"
+												class="btn-step btn-step-danger noshow-btn" data-payid="${book.pay_id}">노쇼 처리</button>
+										</c:when>
+										<c:when test="${book.book_status == 'ING'}">
+											<button type="submit" name="status" value="FINISH"
+												class="btn-step btn-finish confirm-btn" data-payid="${book.pay_id}">식사 확인</button>
+										</c:when>
+										<c:otherwise>
+											<span class="management-end">관리 종료</span>
+										</c:otherwise>
+									</c:choose>
+								</form>
+							</td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
 

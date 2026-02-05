@@ -20,6 +20,8 @@
     justify-content: space-between; 
     align-items: center; 
     margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .card-title-wait { color: #ff3d00; margin: 0; font-weight: 900; }
@@ -31,6 +33,7 @@
     border-collapse: separate;
     border-spacing: 0 12px;
     table-layout: fixed;
+    min-width: 720px;
 }
 
 .manage-dashboard-table th {
@@ -103,6 +106,84 @@
     font-weight: 800;
 }
 
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.table-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-card {
+        padding: 24px;
+    }
+
+    .manage-dashboard-table {
+        min-width: 680px;
+    }
+
+    .col-action {
+        width: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-card {
+        padding: 20px;
+        margin-bottom: 32px;
+    }
+
+    .manage-dashboard-table {
+        min-width: 640px;
+    }
+
+    .manage-dashboard-table th,
+    .manage-dashboard-table td {
+        padding: 14px 8px;
+        font-size: 13px;
+    }
+
+    .action-btn-group {
+        gap: 6px;
+    }
+
+    .btn-step {
+        height: 34px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 520px) {
+    .card-header-flex {
+        align-items: flex-start;
+    }
+
+    .manage-dashboard-table {
+        min-width: 580px;
+    }
+
+    .action-btn-group {
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    .btn-step-danger {
+        font-size: 10px;
+    }
+}
 
 
 /* 예약 Date 스타일 추가 */
