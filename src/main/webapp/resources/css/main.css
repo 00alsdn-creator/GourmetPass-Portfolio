@@ -42,6 +42,7 @@
     outline: none; 
 }
 
+/* [교정] 버튼 텍스트 줄바꿈 및 너비 수축 방지 적용 */
 .btn-search { 
     padding: 0 35px; 
     background: #333; 
@@ -51,6 +52,8 @@
     font-weight: 900; 
     cursor: pointer;
     transition: 0.2s;
+    white-space: nowrap;    /* 텍스트가 두 줄로 나뉘는 것을 방지 */
+    flex-shrink: 0;         /* Flex 컨테이너 안에서 버튼이 작아지는 것을 방지 */
 }
 
 .btn-search:hover { 

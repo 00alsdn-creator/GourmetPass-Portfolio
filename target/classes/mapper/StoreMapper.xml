@@ -4,7 +4,7 @@
 <mapper namespace="com.uhi.gourmet.store.StoreMapper">
 
     <sql id="criteria">
-        <trim prefix="AND (" suffix=")" prefixOverrides="OR">
+        <trim prefix="AND (" suffix=")" prefixOverrides="AND |OR">
             <if test="cri.category != null and cri.category != ''">
                 s.store_category = #{cri.category}
             </if>

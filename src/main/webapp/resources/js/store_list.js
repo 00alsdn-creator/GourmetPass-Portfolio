@@ -50,6 +50,20 @@ function selectCategory(cat) {
 }
 
 /**
+ * [추가] 검색어 동기화 및 실행 함수
+ * 설명: 상단 검색창의 값을 hidden 필드에 복사하고 검색을 실행합니다. (버튼 클릭/엔터 공용)
+ */
+function syncAndSubmit() {
+    const searchInput = document.querySelector(".wire-input");
+    const hiddenKeyword = document.querySelector("#filterForm input[name='keyword']");
+    
+    if (hiddenKeyword && searchInput) {
+        hiddenKeyword.value = searchInput.value;
+    }
+    resetPageAndSubmit();
+}
+
+/**
  * [핵심] 폼 제출 함수
  * 설명: filterForm을 서버(StoreController)로 전송합니다. 
  * 모든 hidden 필드와 검색 조건이 Criteria DTO에 바인딩됩니다.
@@ -72,14 +86,7 @@ document.addEventListener("DOMContentLoaded", function() {
         searchInput.addEventListener("keypress", function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); // 기본 폼 제출 방지
-                
-                // 만약 검색창이 filterForm 외부에 있다면, 내부의 hidden keyword 필드에 값을 복사
-                const hiddenKeyword = document.querySelector("#filterForm input[name='keyword']");
-                if (hiddenKeyword) {
-                    hiddenKeyword.value = searchInput.value;
-                }
-                
-                resetPageAndSubmit();
+                syncAndSubmit(); // 동기화 로직 호출
             }
         });
     }

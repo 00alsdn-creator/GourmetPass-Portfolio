@@ -5,15 +5,29 @@
 <jsp:include page="../common/header.jsp" />
 <link rel="stylesheet" href="<c:url value='/resources/css/store_list.css'/>">
 <link rel="stylesheet" href="<c:url value='/resources/css/member.css'/>">
+<%-- main.css의 검색창 스타일 활용 --%>
+<link rel="stylesheet" href="<c:url value='/resources/css/main.css'/>">
 
 <div class="list-wrapper">
+    <%-- [추가] main.jsp의 검색 섹션을 상단에 배치하여 접근성 강화 --%>
+    <div class="search-card" style="margin-bottom: 30px;">
+        <h1 class="search-title" style="font-size: 1.5rem;">🔎 찾으시는 맛집이 있으신가요?</h1>
+        <div class="search-form">
+            <%-- store_list.js의 엔터키 로직과 동기화되는 .wire-input 클래스 사용 --%>
+            <input type="text" id="visibleKeyword" class="wire-input" 
+                   placeholder="가게 이름 또는 메뉴 검색" value="${keyword}" required>
+            <button type="button" class="btn-search" onclick="syncAndSubmit()">맛집 검색</button>
+        </div>
+    </div>
+
     <%-- 1. 필터 섹션 --%>
     <div class="filter-card">
         <form id="filterForm" action="${pageContext.request.contextPath}/store/list" method="get">
+            <%-- 페이징 및 검색 상태 유지를 위한 Hidden 필드 --%>
             <input type="hidden" name="pageNum" id="pageNum" value="${pageMaker.cri.pageNum}">
             <input type="hidden" name="amount" value="${pageMaker.cri.amount}">
             <input type="hidden" name="category" id="selectedCategory" value="${category}">
-            <input type="hidden" name="keyword" value="${keyword}">
+            <input type="hidden" name="keyword" id="hiddenKeyword" value="${keyword}">
 
             <div class="filter-item">
                 <label>📍 지역 선택</label>
@@ -97,7 +111,14 @@
     </div>
 </div>
 
-<%-- [핵심 수정] 미작동의 원인: 스크립트 파일을 반드시 포함해야 합니다 --%>
-<script src="${pageContext.request.contextPath}/resources/js/store_list.js"></script>
+<%-- 검색 버튼 클릭 시 동기화를 위한 보조 스크립트 --%>
+<script>
+function syncAndSubmit() {
+    const visibleVal = document.getElementById('visibleKeyword').value;
+    document.getElementById('hiddenKeyword').value = visibleVal;
+    resetPageAndSubmit(); // store_list.js의 기존 함수 호출
+}
+</script>
 
+<script src="${pageContext.request.contextPath}/resources/js/store_list.js"></script>
 <jsp:include page="../common/footer.jsp" />
