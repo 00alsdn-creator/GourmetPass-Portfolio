@@ -60,7 +60,14 @@
           AND book_status NOT IN ('CANCELED', 'NOSHOW')
     </select>
     
-   
-    
+   	<!-- 날짜별 예약 리스트 조회 -->
+	<select id="selectStoreBookListByDate" resultType="com.uhi.gourmet.book.BookVO">
+	    SELECT B.*, S.store_name 
+	    FROM BOOK B
+	    JOIN STORE S ON B.store_id = S.store_id
+	    WHERE B.store_id = #{store_id} 
+	      AND TRUNC(B.book_date) = TO_DATE(#{book_date}, 'YYYY-MM-DD')
+	    ORDER BY B.book_date ASC
+	</select>
 
 </mapper>

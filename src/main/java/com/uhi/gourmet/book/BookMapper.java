@@ -2,6 +2,8 @@
 package com.uhi.gourmet.book;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -16,7 +18,7 @@ public interface BookMapper {
 
     // 3. 점주 회원: 매장별 예약자 명단 조회
     List<BookVO> selectStoreBookList(int store_id);
-
+    
     // 4. 예약 상태 업데이트 (방문 완료, 노쇼 등)
     void updateBookStatus(@Param("book_id") int book_id, @Param("status") String status);
 
@@ -43,4 +45,8 @@ public interface BookMapper {
     int checkUserDailyBook(@Param("store_id") int store_id, 
                            @Param("user_id") String user_id, 
                            @Param("date") String date);
+
+    // 점주전용 : 날짜별 예약 리스트
+	List<BookVO> selectStoreBookListByDate(@Param("store_id")int store_id, @Param("book_date")String book_date);
+
 }

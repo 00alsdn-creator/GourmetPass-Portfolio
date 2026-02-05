@@ -103,7 +103,29 @@
 			<h3 class="card-title-book">📅 오늘 예약 현황</h3>
 			<span class="badge-wire">총 ${store_book_list.size()}건</span>
 		</div>
-
+		
+		<%-- 🆕 날짜 선택 필터 --%>
+	    <div class="date-filter">
+	        <h3 style="margin: 0 0 15px 0; font-size: 18px;">📆 날짜별 예약 조회</h3>
+	        <form action="<c:url value='/book/manage'/>" method="get">
+	            <div class="date-filter-container">
+	                <label for="book_date" style="font-weight: 800;">예약 날짜:</label>
+	                <input type="date" 
+	                       id="book_date" 
+	                       name="book_date" 
+	                       value="${selected_date}"
+	                       max="2099-12-31">
+	                <button type="submit" class="btn-filter">조회</button>
+	            </div>
+	        </form>
+	        <c:if test="${not empty selected_date}">
+	            <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+	                📌 <fmt:parseDate value="${selected_date}" pattern="yyyy-MM-dd" var="parsedDate"/>
+	                <fmt:formatDate value="${parsedDate}" pattern="yyyy년 MM월 dd일"/> 예약 현황
+	            </p>
+	        </c:if>
+	    </div>
+		
 		<table class="manage-dashboard-table">
 			<thead>
 				<tr>

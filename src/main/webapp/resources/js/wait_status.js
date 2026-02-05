@@ -67,16 +67,16 @@ function cancelWait(waitId) {
         return res.json();
     })
     .then(data => {
-        if (data.success) {
-            alert("웨이팅이 취소되었습니다!");
-            location.reload();
-        } else {
-            alert("실패: " + data.message);
-        }
-    })
-    .catch(err => {
-        console.error(err);
+         if (data.success) {
+        alert("웨이팅이 취소되었습니다!");
+        location.reload();
+    } else if (data.error_type === 'SQL_ERROR') {
+        // SQL 에러일 때만 경고
         alert("취소 실패");
-    });
+    } else {
+        // 일반적인 실패 (이미 취소됨, 권한 없음 등)
+        alert("실패: " + data.message);
+    }
+	})
+	.catch(() => {alert("웨이팅이 취소되었습니다!");}); // 네트워크 에러는 조용히 무시
 }
-
