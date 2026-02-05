@@ -25,50 +25,38 @@ public class StoreServiceImpl implements StoreService {
     // 1. 맛집 목록 조회 (PageHelper 반영)
     @Override
     public PageInfo<StoreVO> getStoreList(int pageNum, int pageSize, String category, String region, String keyword) {
-        // [핵심] 쿼리 실행 직전에 페이징 설정을 가로챕니다.
         PageHelper.startPage(pageNum, pageSize);
-        
-        // Mapper는 순수하게 데이터 리스트만 가져오지만, PageHelper가 이를 Page 객체로 변환합니다.
         List<StoreVO> list = storeMapper.getListStore(category, region, keyword);
-        
-        // 최종적으로 페이징 메타데이터(총 페이지, 이전/다음 등)가 포함된 PageInfo를 반환합니다.
         return new PageInfo<>(list);
     }
 
-    // 1-1. 전체 데이터 개수 조회
     @Override
     public int getTotal(String category, String region, String keyword) {
         return storeMapper.getTotalCount(category, region, keyword);
     }
 
-    /**
-     * [추가] 메인 페이지용 인기 맛집 조회 로직
-     */
     @Override
     public List<StoreVO> getPopularStores() {
         return storeMapper.selectPopularStore();
     }
 
-    // 2. 맛집 상세 조회
     @Override
     @Transactional
     public StoreVO getStoreDetail(int storeId) {
         return storeMapper.getStoreDetail(storeId);
     }
 
-    // 3. 메뉴 목록 조회
     @Override
     public List<MenuVO> getMenuList(int storeId) {
         return storeMapper.getMenuList(storeId);
     }
 
-    // 4. 조회수 증가
     @Override
     public void plusViewCount(int storeId) {
         storeMapper.updateViewCount(storeId);
     }
 
-    // 5. 가게 등록 (점주 전용)
+    // 5. 가게 등록
     @Override
     @Transactional
     public void registerStore(StoreVO vo, String userId) {
@@ -80,14 +68,20 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public void modifyStore(StoreVO vo, String userId) {
+        // [수정 포인트] ID가 0이면 수정 대상이 아니므로 예외를 던져 롤백하거나 중단합니다.
+        if (vo.getStore_id() <= 0) {
+            throw new RuntimeException("유효하지 않은 가게 ID입니다. (ID: 0)");
+        }
+
         StoreVO check = storeMapper.getStoreDetail(vo.getStore_id());
         if (check != null && check.getUser_id().equals(userId)) {
             vo.setUser_id(userId);
             storeMapper.updateStore(vo);
+        } else {
+            throw new RuntimeException("가게 수정 권한이 없거나 해당 가게가 존재하지 않습니다.");
         }
     }
 
-    // 7. 내 가게 정보 조회
     @Override
     public StoreVO getMyStore(int storeId, String userId) {
         StoreVO store = storeMapper.getStoreDetail(storeId);
@@ -97,7 +91,6 @@ public class StoreServiceImpl implements StoreService {
         return null;
     }
 
-    // 8. 점주 ID로 가게 조회
     @Override
     public StoreVO get_store_by_user_id(String userId) {
         return storeMapper.getStoreByUserId(userId);
@@ -107,10 +100,20 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public void addMenu(MenuVO vo, String userId) {
+        // [수정 포인트] store_id가 0으로 넘어올 경우 FK 제약조건 위반을 방지합니다.
+        if (vo.getStore_id() <= 0) {
+            throw new RuntimeException("가게 정보(ID)가 누락되었습니다.");
+        }
+
         StoreVO store = storeMapper.getStoreDetail(vo.getStore_id());
         if (store != null && store.getUser_id().equals(userId)) {
-            if (vo.getMenu_sign() == null) vo.setMenu_sign("N");
+            // [추가] 빈 문자열("")이 들어올 경우 DB 제약조건 위반 방지를 위해 'N'으로 세팅
+            if (vo.getMenu_sign() == null || vo.getMenu_sign().trim().isEmpty()) {
+                vo.setMenu_sign("N");
+            }
             storeMapper.insertMenu(vo);
+        } else {
+            throw new RuntimeException("메뉴 등록 권한이 없습니다.");
         }
     }
 
@@ -127,7 +130,6 @@ public class StoreServiceImpl implements StoreService {
         }
     }
 
-    // 11. 메뉴 상세 조회
     @Override
     public MenuVO getMenuDetail(int menuId, String userId) {
         MenuVO menu = storeMapper.getMenuDetail(menuId);
@@ -144,17 +146,24 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public void modifyMenu(MenuVO vo, String userId) {
+        // [수정 포인트] 0번 메뉴 수정 방지
+        if (vo.getMenu_id() <= 0) {
+            throw new RuntimeException("유효하지 않은 메뉴 ID입니다.");
+        }
+
         MenuVO menu = storeMapper.getMenuDetail(vo.getMenu_id());
         if (menu != null) {
             StoreVO store = storeMapper.getStoreDetail(menu.getStore_id());
             if (store != null && store.getUser_id().equals(userId)) {
-                if (vo.getMenu_sign() == null) vo.setMenu_sign("N");
+                if (vo.getMenu_sign() == null || vo.getMenu_sign().trim().isEmpty()) {
+                    vo.setMenu_sign("N");
+                }
                 storeMapper.updateMenu(vo);
             }
         }
     }
 
-    // 13. 실시간 예약 가능 시간 슬롯 동적 생성
+    // 13. 예약 가능 시간 슬롯 동적 생성
     @Override
     public List<String> getAvailableTimeSlots(StoreVO store, String bookDate) {
         List<String> allSlots = generateTimeSlots(store);

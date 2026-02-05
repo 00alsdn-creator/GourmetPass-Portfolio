@@ -2,68 +2,66 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.uhi.gourmet.review.ReviewMapper">
 
-	<insert id="insertReview">
-		INSERT INTO REVIEW (
-		review_id, store_id, book_id, wait_id,
-		rating, content, img_url, review_date
-		) VALUES (
-		SEQ_REVIEW.NEXTVAL, #{store_id},
-		#{book_id, jdbcType=INTEGER},
-		#{wait_id, jdbcType=INTEGER},
-		#{rating}, #{content, jdbcType=VARCHAR},
-		#{img_url, jdbcType=VARCHAR}, SYSDATE
-		)
-	</insert>
+    <insert id="insertReview">
+        INSERT INTO REVIEW (
+            review_id, store_id, book_id, wait_id,
+            rating, content, img_url, review_date
+        ) VALUES (
+            SEQ_REVIEW.NEXTVAL, #{store_id},
+            #{book_id, jdbcType=INTEGER},
+            #{wait_id, jdbcType=INTEGER},
+            #{rating}, #{content, jdbcType=VARCHAR},
+            #{img_url, jdbcType=VARCHAR}, SYSDATE
+        )
+    </insert>
 
-	<select id="selectStoreReviews"
-		resultType="com.uhi.gourmet.review.ReviewVO">
-		SELECT
-		r.*,
-		m.user_nm
-		FROM REVIEW r
-		LEFT JOIN BOOK b ON r.book_id = b.book_id
-		LEFT JOIN WAIT w ON r.wait_id = w.wait_id
-		JOIN MEMBERS m ON (COALESCE(b.user_id, w.user_id) = m.user_id)
-		WHERE r.store_id = #{store_id}
-		ORDER BY r.review_date DESC
-	</select>
+    <select id="selectStoreReviews" resultType="com.uhi.gourmet.review.ReviewVO">
+        SELECT
+            r.*,
+            m.user_nm
+        FROM REVIEW r
+        LEFT JOIN BOOK b ON r.book_id = b.book_id
+        LEFT JOIN WAIT w ON r.wait_id = w.wait_id
+        JOIN MEMBERS m ON (COALESCE(b.user_id, w.user_id) = m.user_id)
+        WHERE r.store_id = #{store_id}
+        ORDER BY r.review_date DESC
+    </select>
 
-	<select id="selectMyReviews"
-		resultType="com.uhi.gourmet.review.ReviewVO">
-		SELECT
-		r.*,
-		s.store_name
-		FROM REVIEW r
-		JOIN STORE s ON r.store_id = s.store_id
-		LEFT JOIN BOOK b ON r.book_id = b.book_id
-		LEFT JOIN WAIT w ON r.wait_id = w.wait_id
-		WHERE b.user_id = #{user_id} OR w.user_id = #{user_id}
-		ORDER BY r.review_date DESC
-	</select>
+    <select id="selectMyReviews" resultType="com.uhi.gourmet.review.ReviewVO">
+        SELECT
+            r.*,
+            s.store_name
+        FROM REVIEW r
+        JOIN STORE s ON r.store_id = s.store_id
+        LEFT JOIN BOOK b ON r.book_id = b.book_id
+        LEFT JOIN WAIT w ON r.wait_id = w.wait_id
+        WHERE b.user_id = #{user_id} OR w.user_id = #{user_id}
+        ORDER BY r.review_date DESC
+    </select>
 
-	<select id="selectReviewStats" resultType="map">
-		SELECT
-		COUNT(*) as "review_cnt",
-		NVL(ROUND(AVG(rating), 1), 0) as "avg_rating"
-		FROM REVIEW
-		WHERE store_id = #{store_id}
-	</select>
+    <select id="selectReviewStats" resultType="map">
+        SELECT
+            COUNT(*) as "review_cnt",
+            NVL(ROUND(AVG(rating), 1), 0) as "avg_rating"
+        FROM REVIEW
+        WHERE store_id = #{store_id}
+    </select>
 
-	<delete id="deleteReview">
-		DELETE FROM REVIEW WHERE review_id = #{review_id}
-	</delete>
+    <delete id="deleteReview">
+        DELETE FROM REVIEW WHERE review_id = #{review_id}
+    </delete>
 
-	<select id="countFinishedVisits" resultType="int">
-		SELECT (
-		(SELECT COUNT(*) FROM BOOK 
-		 WHERE user_id = #{user_id} AND store_id = #{store_id} 
-		 AND book_status = 'FINISH'
-		 AND book_id NOT IN (SELECT NVL(book_id, 0) FROM REVIEW)) +
-		(SELECT COUNT(*) FROM WAIT 
-		 WHERE user_id = #{user_id} AND store_id = #{store_id} 
-		 AND wait_status = 'FINISH'
-		 AND wait_id NOT IN (SELECT NVL(wait_id, 0) FROM REVIEW))
-		) as total_cnt FROM DUAL
-	</select>
+    <select id="countFinishedVisits" resultType="int">
+        SELECT (
+            (SELECT COUNT(*) FROM BOOK 
+             WHERE user_id = #{user_id} AND store_id = #{store_id} 
+             AND book_status = 'FINISH'
+             AND book_id NOT IN (SELECT NVL(book_id, 0) FROM REVIEW)) +
+            (SELECT COUNT(*) FROM WAIT 
+             WHERE user_id = #{user_id} AND store_id = #{store_id} 
+             AND wait_status = 'FINISH'
+             AND wait_id NOT IN (SELECT NVL(wait_id, 0) FROM REVIEW))
+        ) as total_cnt FROM DUAL
+    </select>
 
 </mapper>

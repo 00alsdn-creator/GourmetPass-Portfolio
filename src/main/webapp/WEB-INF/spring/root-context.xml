@@ -12,7 +12,6 @@
 	<context:property-placeholder
 		location="classpath:api.properties" />
 
-
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 		<property name="driverClassName" value="${db.driver}" />
 		<property name="jdbcUrl" value="${db.url}" />

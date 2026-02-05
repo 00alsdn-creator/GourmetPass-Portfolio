@@ -149,13 +149,14 @@
 		</sec:authorize>
 	</div>
 
-	<%-- 6. 지도 및 리뷰 섹션 (스타일 CSS로 전이) --%>
+	<%-- 6. 지도 및 리뷰 섹션 --%>
 	<div id="map"></div>
 
 	<div class="review-summary-section">
 		<div class="card-header">
 			<h3 class="card-title">💬 최근 리뷰</h3>
-			<a href="<c:url value='/store/reviews?store_id=${store.store_id}'/>"
+			<%-- [수정] 리뷰 도메인 분리에 따른 경로 최신화 (/store/reviews -> /review/list) --%>
+			<a href="<c:url value='/review/list?store_id=${store.store_id}'/>"
 				class="btn-wire-small">전체보기 ❯</a>
 		</div>
 		<div class="review-grid">

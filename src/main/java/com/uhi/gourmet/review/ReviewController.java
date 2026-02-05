@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.github.pagehelper.PageInfo;
+import com.uhi.gourmet.store.StoreService;
+import com.uhi.gourmet.store.StoreVO;
+
 @Controller
 @RequestMapping("/review")
 public class ReviewController {
@@ -20,9 +24,37 @@ public class ReviewController {
     @Autowired
     private ReviewService review_service;
 
+    // [추가] 리뷰 목록 헤더에 가게 정보를 표시하기 위해 주입
+    @Autowired
+    private StoreService store_service;
+
     /**
-     * 1. 리뷰 작성 페이지 이동 (GET)
-     * [리팩토링] 데이터 수집 및 자격 검증 로직을 서비스로 위임
+     * [신규] 1. 특정 가게의 전체 리뷰 목록 조회 (페이징 적용)
+     * 기존 StoreController의 기능을 이관하고 PageHelper를 적용했습니다.
+     */
+    @GetMapping("/list")
+    public String reviewList(
+            @RequestParam("store_id") int storeId,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "2") int pageSize,
+            Model model) {
+        
+        // 1. 헤더용 가게 상세 정보 조회
+        StoreVO store = store_service.getStoreDetail(storeId);
+        
+        // 2. 페이징 처리된 리뷰 목록 조회 (PageInfo 반환)
+        PageInfo<ReviewVO> pageMaker = review_service.getStoreReviews(storeId, pageNum, pageSize);
+        
+        model.addAttribute("store", store);
+        model.addAttribute("allReviews", pageMaker.getList()); // 실제 데이터 리스트
+        model.addAttribute("pageMaker", pageMaker);           // 페이징 메타데이터
+        
+        return "review/review_list";
+    }
+
+    /**
+     * 2. 리뷰 작성 페이지 이동 (GET)
+     * 데이터 수집 및 자격 검증 로직을 서비스로 위임
      */
     @GetMapping("/write")
     public String writePage(@RequestParam("store_id") int storeId,
@@ -32,7 +64,7 @@ public class ReviewController {
         
         if (principal == null) return "redirect:/member/login";
 
-        // [수정 포인트] 서비스에서 모든 페이지 구성 데이터를 맵으로 받아옴
+        // 서비스에서 모든 페이지 구성 데이터를 맵으로 받아옴
         Map<String, Object> context = review_service.getReviewWriteContext(principal.getName(), storeId, bookId, waitId);
         
         if (!(boolean) context.get("isEligible")) {
@@ -44,8 +76,8 @@ public class ReviewController {
     }
 
     /**
-     * 2. 리뷰 등록 프로세스 (POST)
-     * [리팩토링] 서비스 내부에서 자격 재검증 및 ID 주입을 한 번에 처리
+     * 3. 리뷰 등록 프로세스 (POST)
+     * 서비스 내부에서 자격 재검증 및 ID 주입을 한 번에 처리
      */
     @PostMapping("/write")
     public String writeProcess(ReviewVO vo, Principal principal, RedirectAttributes rttr) {
@@ -53,7 +85,7 @@ public class ReviewController {
         if (principal == null) return "redirect:/member/login";
         
         try {
-            // [수정 포인트] 비즈니스 로직(검증+저장)을 서비스 메서드 하나로 해결
+            // 비즈니스 로직(검증+저장)을 서비스 메서드 하나로 해결
             review_service.registerReview(vo, principal.getName());
             rttr.addFlashAttribute("msg", "소중한 리뷰가 등록되었습니다.");
             
@@ -67,7 +99,7 @@ public class ReviewController {
     }
 
     /**
-     * 3. 리뷰 삭제 프로세스
+     * 4. 리뷰 삭제 프로세스
      */
     @PostMapping("/delete")
     public String deleteProcess(@RequestParam("review_id") int review_id, 
@@ -77,6 +109,7 @@ public class ReviewController {
         review_service.removeReview(review_id);
         rttr.addFlashAttribute("msg", "리뷰가 삭제되었습니다.");
         
-        return "redirect:/store/detail?storeId=" + store_id;
+        // 삭제 후 해당 가게의 리뷰 목록 페이지로 리다이렉트
+        return "redirect:/review/list?store_id=" + store_id;
     }
 }

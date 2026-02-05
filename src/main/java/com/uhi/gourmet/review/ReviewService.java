@@ -3,13 +3,14 @@ package com.uhi.gourmet.review;
 
 import java.util.List;
 import java.util.Map;
+import com.github.pagehelper.PageInfo;
 
 public interface ReviewService {
     // 1. 리뷰 등록 (비즈니스 검증 로직 포함)
     void registerReview(ReviewVO vo, String userId);
 
-    // 2. 특정 가게의 리뷰 목록 조회
-    List<ReviewVO> getStoreReviews(int store_id);
+    // 2. [수정] 특정 가게의 리뷰 목록 조회 (페이징 적용)
+    PageInfo<ReviewVO> getStoreReviews(int store_id, int pageNum, int pageSize);
 
     // 3. 내가 작성한 리뷰 목록 조회
     List<ReviewVO> getMyReviews(String user_id);

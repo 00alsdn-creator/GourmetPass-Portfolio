@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.uhi.gourmet.store.StoreService;
 import com.uhi.gourmet.store.StoreVO;
 
@@ -22,7 +24,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private StoreService store_service;
 
-    // [수정 포인트: 비즈니스 검증 로직을 서비스 내부로 흡수]
+    // [수정 포인트: 데이터 정화 로직 추가]
     @Override
     public void registerReview(ReviewVO vo, String userId) {
         // 1. 권한 검증
@@ -30,14 +32,27 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("방문 완료 후에만 리뷰를 작성할 수 있습니다.");
         }
         
-        // 2. 데이터 세팅 및 저장
+        // 2. [최소 수정] 외래키 제약 조건 위반(0 입력) 방지 로직 추가
+        // 폼 바인딩 시 0으로 들어온 Integer 값을 null로 변경하여 DB 에러 및 롤백을 막습니다.
+        if (vo.getBook_id() != null && vo.getBook_id() == 0) vo.setBook_id(null);
+        if (vo.getWait_id() != null && vo.getWait_id() == 0) vo.setWait_id(null);
+        
+        // 3. 데이터 세팅 및 저장
         vo.setUser_id(userId);
         review_mapper.insertReview(vo);
     }
 
+    // [수정] 특정 가게의 리뷰 목록 조회 (PageHelper 적용)
     @Override
-    public List<ReviewVO> getStoreReviews(int store_id) {
-        return review_mapper.selectStoreReviews(store_id);
+    public PageInfo<ReviewVO> getStoreReviews(int store_id, int pageNum, int pageSize) {
+        // 페이징 시작 설정
+        PageHelper.startPage(pageNum, pageSize);
+        
+        // Mapper 호출 (PageHelper에 의해 결과가 Page 객체로 반환됨)
+        List<ReviewVO> list = review_mapper.selectStoreReviews(store_id);
+        
+        // PageInfo로 래핑하여 반환
+        return new PageInfo<>(list);
     }
 
     @Override

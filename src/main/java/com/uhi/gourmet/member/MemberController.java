@@ -1,17 +1,18 @@
+/* com/uhi/gourmet/member/MemberController.java */
 package com.uhi.gourmet.member;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Random; // 난수 생성을 위해 추가
+import java.util.Random;
 
-import javax.mail.internet.MimeMessage; // 메일 전송을 위해 추가
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSenderImpl; // 메일 발송 객체 주입을 위해 추가
-import org.springframework.mail.javamail.MimeMessageHelper; // 메일 작성을 위해 추가
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,11 +30,11 @@ import com.uhi.gourmet.store.StoreVO;
 import com.uhi.gourmet.review.ReviewService; 
 import com.uhi.gourmet.review.ReviewVO;
 
-import lombok.extern.log4j.Log4j2; // 로그 출력을 위해 추가
+import lombok.extern.log4j.Log4j2;
 
 @Controller
 @RequestMapping("/member")
-@Log4j2 // 로그 사용 활성화
+@Log4j2
 public class MemberController {
 
     @Autowired
@@ -51,7 +52,6 @@ public class MemberController {
     @Autowired
     private ReviewService review_service; 
 
-    // root-context.xml에 등록된 mailSender 주입
     @Autowired
     private JavaMailSenderImpl mailSender;
 
@@ -62,59 +62,42 @@ public class MemberController {
         model.addAttribute("kakaoJsKey", kakaoJsKey);
     }
 
-    // --- 팀원의 이메일 인증 로직 병합 시작 ---
     @PostMapping("/emailAuth")
     @ResponseBody
     public int emailAuth(@RequestParam("email") String email) {
-
         log.info("이메일 인증 요청 수신: " + email);
-
-        // 111111 ~ 999999 범위의 6자리 난수 생성
         Random random = new Random();
         int checkNum = random.nextInt(888888) + 111111;
 
-        // 이메일 보낼 양식 설정
-        String setFrom = "boardexample114@gmail.com"; // root-context.xml에 설정된 계정
+        String setFrom = "boardexample114@gmail.com";
         String toMail = email;
         String title = "Gourmet 회원가입 인증 이메일입니다.";
-        String content = "GourmetPass를 이용해주셔서 감사합니다." +
-                         "<br><br>" +
-                         "인증 코드는 <b>" + checkNum + "</b> 입니다." +
-                         "<br>" +
+        String content = "GourmetPass를 이용해주셔서 감사합니다.<br><br>" +
+                         "인증 코드는 <b>" + checkNum + "</b> 입니다.<br>" +
                          "해당 인증 코드를 인증 코드 확인란에 기입하여 주세요.";
 
         try {
-            MimeMessage message = mailSender.createMimeMessage(); // Spring 제공 Mail API
+            MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
-            
             helper.setFrom(setFrom);
             helper.setTo(toMail);
             helper.setSubject(title);
-            helper.setText(content, true); // true는 HTML 사용 설정
-            
+            helper.setText(content, true);
             mailSender.send(message);
-            log.info("인증 메일 전송 성공: " + checkNum);
         } catch (Exception e) {
             log.error("메일 전송 실패: " + e.getMessage());
-            e.printStackTrace();
         }
-
-        return checkNum; // 클라이언트(JS)에서 대조할 수 있도록 난수 반환
+        return checkNum;
     }
-    // --- 팀원의 이메일 인증 로직 병합 종료 ---
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error, Model model) {
-        if (error != null) {
-            model.addAttribute("msg", "아이디 또는 비밀번호를 확인해주세요.");
-        }
+        if (error != null) model.addAttribute("msg", "아이디 또는 비밀번호를 확인해주세요.");
         return "member/login";
     }
 
     @GetMapping("/signup/select")
-    public String signupSelectPage() {
-        return "member/signup_select";
-    }
+    public String signupSelectPage() { return "member/signup_select"; }
 
     @GetMapping("/signup/general")
     public String signupGeneralPage(Model model) {
@@ -170,14 +153,15 @@ public class MemberController {
                 model.addAttribute("store", store);
                 model.addAttribute("menuList", storeMapper.getMenuList(store.getStore_id()));
                 model.addAttribute("store_book_list", book_service.get_store_book_list(store.getStore_id()));
-                model.addAttribute("store_review_list", review_service.getStoreReviews(store.getStore_id()));
+                
+                // [수정] PageInfo에서 List를 추출 (최근 10개 표시)
+                model.addAttribute("store_review_list", review_service.getStoreReviews(store.getStore_id(), 1, 10).getList());
             } else {
                 model.addAttribute("noStoreMsg", "등록된 매장 정보가 없습니다.");
             }
             return "member/mypage_owner";
         } else {
-            List<ReviewVO> my_review_list = review_service.getMyReviews(user_id);
-            model.addAttribute("my_review_list", my_review_list);
+            model.addAttribute("my_review_list", review_service.getMyReviews(user_id));
             return "member/mypage"; 
         }
     }
@@ -185,18 +169,13 @@ public class MemberController {
     @GetMapping("/wait_status")
     public String myStatus(Principal principal, Model model) {
         if (principal == null) return "redirect:/member/login";
-        
-        String user_id = principal.getName();
-        model.addAllAttributes(memberService.getMyStatusSummary(user_id));
-        
+        model.addAllAttributes(memberService.getMyStatusSummary(principal.getName()));
         return "wait/wait_status"; 
     }
 
     @GetMapping("/edit")
     public String editPage(Principal principal, Model model) {
-        String userId = principal.getName();
-        MemberVO member = memberService.getMember(userId);
-        model.addAttribute("member", member);
+        model.addAttribute("member", memberService.getMember(principal.getName()));
         addKakaoKeyToModel(model);
         return "member/member_edit";
     }
@@ -212,9 +191,7 @@ public class MemberController {
     public String deleteMember(@RequestParam("user_id") String user_id, HttpSession session, RedirectAttributes rttr) {
         memberService.deleteMember(user_id);
         SecurityContextHolder.clearContext();
-        if (session != null) {
-            session.invalidate();
-        }
+        if (session != null) session.invalidate();
         rttr.addFlashAttribute("msg", "정상적으로 탈퇴되었습니다.");
         return "redirect:/";
     }
@@ -222,7 +199,6 @@ public class MemberController {
     @PostMapping("/idCheck")
     @ResponseBody
     public String idCheck(@RequestParam("user_id") String user_id) {
-        int count = memberService.checkIdDuplicate(user_id);
-        return (count > 0) ? "fail" : "success";
+        return (memberService.checkIdDuplicate(user_id) > 0) ? "fail" : "success";
     }
 }
