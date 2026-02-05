@@ -102,26 +102,46 @@
                 </section>
             </div>
 
-            <div class="review-container">
-                <h3 class="section-title">💬 우리 가게 리뷰 (${store_review_list.size()})</h3>
+            <%-- [핵심 수정 섹션] 리뷰 요약 노출 및 전체보기 연동 --%>
+            <div class="review-container" style="margin-top: 30px;">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="section-title" style="margin: 0;">💬 우리 가게 리뷰 (${store_review_list.size()})</h3>
+                    <%-- store_detail.jsp와 동일한 버튼 스타일 및 경로 적용 --%>
+                    <a href="<c:url value='/review/list?store_id=${store.store_id}'/>" class="btn-wire-small">전체보기 ❯</a>
+                </div>
+
                 <div class="store-review-list">
-                    <c:forEach var="review" items="${store_review_list}">
-                        <div class="item-card">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #ddd; padding-bottom: 10px;">
-                                <div>
-                                    <strong style="font-size: 16px;">${review.user_nm} 고객님</strong>
-                                    <span style="color: #f1c40f; margin-left: 10px;"><c:forEach begin="1" end="${review.rating}">⭐</c:forEach></span>
+                    <c:choose>
+                        <c:when test="${not empty store_review_list}">
+                            <%-- 최근 2개만 노출하기 위해 end="1" 설정 (0, 1 인덱스) --%>
+                            <c:forEach var="review" items="${store_review_list}" end="1">
+                                <div class="item-card">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #ddd; padding-bottom: 10px;">
+                                        <div>
+                                            <strong style="font-size: 16px;">${review.user_nm} 고객님</strong>
+                                            <span style="color: #f1c40f; margin-left: 10px;">
+                                                <c:forEach begin="1" end="${review.rating}">⭐</c:forEach>
+                                            </span>
+                                        </div>
+                                        <span style="color: #999; font-size: 13px;">
+                                            <fmt:formatDate value="${review.review_date}" pattern="yyyy.MM.dd" />
+                                        </span>
+                                    </div>
+                                    <div style="display: flex; gap: 20px;">
+                                        <c:if test="${not empty review.img_url}">
+                                            <img src="<c:url value='/upload/${review.img_url}'/>" class="item-img-thumb" style="width:120px; height:120px; object-fit: cover; border-radius: 8px;">
+                                        </c:if>
+                                        <p style="line-height: 1.6; font-size: 15px; flex: 1;">${review.content}</p>
+                                    </div>
                                 </div>
-                                <span style="color: #999; font-size: 13px;"><fmt:formatDate value="${review.review_date}" pattern="yyyy.MM.dd" /></span>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="dashboard-card" style="text-align: center; padding: 50px 0; color: #999;">
+                                아직 등록된 리뷰가 없습니다.
                             </div>
-                            <div style="display: flex; gap: 20px;">
-                                <c:if test="${not empty review.img_url}">
-                                    <img src="<c:url value='/upload/${review.img_url}'/>" class="item-img-thumb" style="width:120px; height:120px;">
-                                </c:if>
-                                <p style="line-height: 1.6; font-size: 15px;">${review.content}</p>
-                            </div>
-                        </div>
-                    </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </c:when>
