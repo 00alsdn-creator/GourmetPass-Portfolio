@@ -102,3 +102,56 @@
     font-size: 12px; 
     font-weight: 800;
 }
+
+
+
+/* 예약 Date 스타일 추가 */
+	
+.date-filter {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.date-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.date-filter input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.btn-filter {
+    padding: 10px 20px;
+    background: #ff3d00;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.btn-filter:hover {
+    background: #e63900;
+}
+
+.btn-reset {
+    padding: 10px 20px;
+    background: #666;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.btn-reset:hover {
+    background: #555;
+}

@@ -148,7 +148,6 @@ rotate(
 	color: #ccc;
 	font-size: 12px;
 	font-weight: 800;
-}
 </style>
 
 <%-- 실시간 알림 라이브러리 --%>

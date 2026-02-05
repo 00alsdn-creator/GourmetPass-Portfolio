@@ -2,6 +2,7 @@
 package com.uhi.gourmet.book;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BookService {
     
@@ -21,5 +22,8 @@ public interface BookService {
     
     // 예약 상태 업데이트 (방문 완료, 노쇼, 캔슬 등)
     void update_book_status(int book_id, String status);
+
+
+	List<BookVO> get_store_book_list_by_date(int store_id, String bookDate);
     
 }

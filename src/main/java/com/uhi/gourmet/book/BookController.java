@@ -37,25 +37,51 @@ public class BookController {
 	/**
 	 * [1] 점주용 실시간 매장 관리 센터 [404 해결] 리턴 경로를 실제 파일 위치인 "book/manage"로 수정했습니다.
 	 */
+//	@GetMapping("/manage")
+//	public String manage_page(Principal principal, Model model) {
+//		if (principal == null)
+//			return "redirect:/member/login";
+//
+//		String user_id = principal.getName();
+//		StoreVO store = store_mapper.getStoreByUserId(user_id);
+//
+//		if (store != null) {
+//			int store_id = store.getStore_id();
+//			model.addAttribute("store_book_list", book_service.get_store_book_list(store_id));
+//			model.addAttribute("store_wait_list", wait_service.get_store_wait_list(store_id));
+//			model.addAttribute("store", store);
+//		}
+//
+//		// DispatcherServlet이 /WEB-INF/views/book/manage.jsp를 찾도록 경로 고정
+//		return "book/manage";
+//	}
+	
 	@GetMapping("/manage")
-	public String manage_page(Principal principal, Model model) {
-		if (principal == null)
-			return "redirect:/member/login";
+	public String manage_page(Principal principal, Model model,
+	                         @RequestParam(value="book_date", required=false) String bookDate) {
+		if (principal == null) return "redirect:/member/login";
 
-		String user_id = principal.getName();
-		StoreVO store = store_mapper.getStoreByUserId(user_id);
+	    String user_id = principal.getName();
+	    StoreVO store = store_mapper.getStoreByUserId(user_id);
 
-		if (store != null) {
-			int store_id = store.getStore_id();
-			model.addAttribute("store_book_list", book_service.get_store_book_list(store_id));
-			model.addAttribute("store_wait_list", wait_service.get_store_wait_list(store_id));
-			model.addAttribute("store", store);
-		}
+	    if (store != null) {
+	        int store_id = store.getStore_id();
+	        
+	        // 날짜가 없으면 오늘 날짜를 기본값으로 설정
+	        if (bookDate == null || bookDate.isEmpty()) {
+	            bookDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	        }
 
-		// DispatcherServlet이 /WEB-INF/views/book/manage.jsp를 찾도록 경로 고정
-		return "book/manage";
+	        // 전체 조회 로직 삭제 후 무조건 날짜별 필터링 조회만 수행
+	        model.addAttribute("store_book_list", book_service.get_store_book_list_by_date(store_id, bookDate));
+	        model.addAttribute("selected_date", bookDate);
+	        
+	        model.addAttribute("store_wait_list", wait_service.get_store_wait_list(store_id));
+	        model.addAttribute("store", store);
+	    }
+
+	    return "book/manage";
 	}
-
 	/**
 	 * [2] 예약 등록 프로세스 [교정] 예약 완료 시 웨이팅 현황(myStatus)이 아닌 마이페이지(mypage)로 리다이렉트합니다.
 	 */

@@ -33,6 +33,8 @@ $(document).ready(function() {
         }
         
     });
+    
+    
 });
     // 식사완료, 노쇼시의 환불 로직 JAVASCRIPT
 function cancelPay(pay_id, form) {	// pay_id 를 매개변수로 가져와서

@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -125,7 +126,8 @@ public class BookServiceImpl implements BookService {
 		book_mapper.updateBookStatus(book_id, status);
 	}
 
-	
-
-	
+	@Override
+	public List<BookVO> get_store_book_list_by_date(int store_id, String book_date) {
+	    return book_mapper.selectStoreBookListByDate(store_id, book_date);
+	}
 }
