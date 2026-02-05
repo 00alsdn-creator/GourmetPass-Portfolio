@@ -12,18 +12,20 @@ public interface StoreMapper {
     List<StoreVO> selectPopularStore();
 
     /**
-     * [DTO 적용] 2. 맛집 리스트 조회
-     * 기존 개별 @Param 방식에서 Criteria DTO 방식으로 변경하여 확장성을 확보했습니다.
-     * @param cri 페이지 번호, 출력량, 검색 조건을 담은 객체
+     * [수정] 맛집 리스트 조회
+     * Criteria DTO를 제거하고 검색에 필요한 파라미터만 직접 받습니다.
+     * 페이징 처리는 Service 계층에서 PageHelper.startPage()가 수행하므로 파라미터에서 제외됩니다.
      */
-    List<StoreVO> getListStore(@Param("cri") Criteria cri);
+    List<StoreVO> getListStore(@Param("category") String category, 
+                               @Param("region") String region, 
+                               @Param("keyword") String keyword);
 
-    /**
-     * [신규] 2-1. 페이징을 위한 전체 맛집 개수 조회
-     * PageDTO에서 실제 마지막 페이지(realEnd)를 계산하기 위해 반드시 필요합니다.
-     * @param cri 검색 조건이 포함된 Criteria 객체
-     */
-    int getTotalCount(@Param("cri") Criteria cri);
+    // [기존 getTotalCount는 PageHelper가 자동으로 처리하므로 인터페이스에서 삭제 가능하지만, 
+    //  다른 용도로 사용될 가능성을 고려해 검색 필터 기반 개수 조회 기능으로 명칭 유지 가능합니다. 
+    //  여기서는 순수 PageHelper 방식을 위해 제거하거나 정제합니다.]
+    int getTotalCount(@Param("category") String category, 
+                      @Param("region") String region, 
+                      @Param("keyword") String keyword);
 
     // [3] 특정 가게의 상세 정보 조회 (store_id 기준)
     StoreVO getStoreDetail(int store_id);

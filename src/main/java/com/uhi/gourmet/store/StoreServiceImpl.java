@@ -13,27 +13,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
 @Service
 public class StoreServiceImpl implements StoreService {
 
     @Autowired
     private StoreMapper storeMapper;
 
-    // 1. 맛집 목록 조회 (페이징 반영)
+    // 1. 맛집 목록 조회 (PageHelper 반영)
     @Override
-    public List<StoreVO> getStoreList(Criteria cri) {
-        return storeMapper.getListStore(cri);
+    public PageInfo<StoreVO> getStoreList(int pageNum, int pageSize, String category, String region, String keyword) {
+        // [핵심] 쿼리 실행 직전에 페이징 설정을 가로챕니다.
+        PageHelper.startPage(pageNum, pageSize);
+        
+        // Mapper는 순수하게 데이터 리스트만 가져오지만, PageHelper가 이를 Page 객체로 변환합니다.
+        List<StoreVO> list = storeMapper.getListStore(category, region, keyword);
+        
+        // 최종적으로 페이징 메타데이터(총 페이지, 이전/다음 등)가 포함된 PageInfo를 반환합니다.
+        return new PageInfo<>(list);
     }
 
     // 1-1. 전체 데이터 개수 조회
     @Override
-    public int getTotal(Criteria cri) {
-        return storeMapper.getTotalCount(cri);
+    public int getTotal(String category, String region, String keyword) {
+        return storeMapper.getTotalCount(category, region, keyword);
     }
 
     /**
      * [추가] 메인 페이지용 인기 맛집 조회 로직
-     * Mapper에서 정의된 상위 6개 매장 조회 SQL을 실행합니다.
      */
     @Override
     public List<StoreVO> getPopularStores() {
@@ -156,7 +165,7 @@ public class StoreServiceImpl implements StoreService {
         return allSlots;
     }
 
-    // 14. 기초 시간 슬롯 생성 로직 (영업시간 및 단위 기반)
+    // 14. 기초 시간 슬롯 생성 로직
     @Override
     public List<String> generateTimeSlots(StoreVO store) {
         List<String> slots = new ArrayList<>();

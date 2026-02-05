@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.pagehelper.PageInfo;
 import com.uhi.gourmet.book.BookService;
 import com.uhi.gourmet.member.MemberService;
 import com.uhi.gourmet.member.MemberVO;
@@ -52,37 +53,39 @@ public class StoreController {
     @Value("${kakao.js.key}")
     private String kakaoJsKey;
     
-	/* portOne 관련 값 */
+    /* portOne 관련 값 */
     @Value("${portone.store.id}")
     private String portOneStoreId;
     @Value("${portone.channel.key}")
     private String portOneChannelKey;
 
     /**
-     * [리팩토링] 1. 맛집 목록 조회 (페이징 및 동적 필터링 반영)
-     * @param cri : 같은 패키지 내 Criteria.java 객체를 바인딩합니다.
+     * [수정] 1. 맛집 목록 조회 (PageHelper 기반 페이징 적용)
+     * Criteria 객체 대신 @RequestParam을 사용하여 페이지 번호와 검색 필터를 직접 받습니다.
      */
     @GetMapping("/list")
-    public String storeList(@ModelAttribute Criteria cri, Model model) {
+    public String storeList(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "6") int pageSize,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "region", required = false) String region,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            Model model) {
         
-        // [로직 1] Criteria 바구니를 사용하여 해당 페이지의 데이터만 가져옵니다.
-        List<StoreVO> storeList = storeService.getStoreList(cri);
-        model.addAttribute("storeList", storeList); 
+        // [로직 1] 서비스에서 PageHelper.startPage()를 호출하고 결과를 PageInfo 객체로 받습니다.
+        PageInfo<StoreVO> pageMaker = storeService.getStoreList(pageNum, pageSize, category, region, keyword);
         
-        // [로직 2] 검색 조건에 맞는 '전체 데이터 개수'를 가져옵니다.
-        int total = storeService.getTotal(cri);
+        // [로직 2] 실제 데이터 리스트는 PageInfo의 getList()를 통해 꺼냅니다.
+        model.addAttribute("storeList", pageMaker.getList()); 
         
-        /**
-         * [DTO 활용] PageDTO (페이징 계산 엔진)
-         * 동일 패키지 내의 PageDTO 클래스를 인스턴스화합니다.
-         */
-        PageDTO pageMaker = new PageDTO(cri, total);
+        // [로직 3] PageDTO의 역할을 PageInfo가 완전히 대체합니다.
+        // JSP에서는 기존의 pageMaker.startPage 등과 유사한 PageInfo 속성을 사용하게 됩니다.
         model.addAttribute("pageMaker", pageMaker);
         
-        // [상태 유지] 필터 선택 정보 전달
-        model.addAttribute("category", cri.getCategory());
-        model.addAttribute("region", cri.getRegion());
-        model.addAttribute("keyword", cri.getKeyword());
+        // [상태 유지] 필터 선택 정보 유지
+        model.addAttribute("category", category);
+        model.addAttribute("region", region);
+        model.addAttribute("keyword", keyword);
         
         return "store/store_list";
     }
@@ -95,7 +98,6 @@ public class StoreController {
             MemberVO loginUser = memberService.getMember(principal.getName()); 
             model.addAttribute("loginUser", loginUser);
         }
-        
         
         storeService.plusViewCount(storeId);
         

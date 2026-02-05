@@ -3,6 +3,7 @@ package com.uhi.gourmet.store;
 
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
+import com.github.pagehelper.PageInfo;
 
 /**
  * 맛집 관련 비즈니스 로직 인터페이스
@@ -11,19 +12,24 @@ public interface StoreService {
     
     // 1. 맛집 목록 및 상세 조회
     /**
-     * [DTO 적용] 맛집 목록 조회
-     * @param cri 현재 페이지, 페이지당 게시물 수, 검색 조건을 담은 객체 
-     * @return 검색 조건 및 페이징이 적용된 맛집 리스트
+     * [수정] 맛집 목록 조회 (PageHelper 적용)
+     * @param pageNum  현재 페이지 번호
+     * @param pageSize 페이지당 출력할 데이터 개수
+     * @param category 카테고리 필터
+     * @param region   지역 필터
+     * @param keyword  검색어 필터
+     * @return 페이징 정보(PageInfo)가 포함된 맛집 결과
      */
-    List<StoreVO> getStoreList(Criteria cri);
+    PageInfo<StoreVO> getStoreList(int pageNum, int pageSize, String category, String region, String keyword);
 
     /**
-     * [신규] 전체 데이터 개수 조회
-     * 페이징 바 UI 생성을 위한 총 레코드 수를 반환합니다. 
-     * @param cri 검색 조건이 포함된 Criteria 객체
-     * @return 전체 행 수
+     * [수정] 전체 데이터 개수 조회
+     * @param category 카테고리 필터
+     * @param region   지역 필터
+     * @param keyword  검색어 필터
+     * @return 검색 조건에 해당하는 총 행 수
      */
-    int getTotal(Criteria cri);
+    int getTotal(String category, String region, String keyword);
 
     /**
      * [신규] 메인 페이지용 인기 맛집 조회

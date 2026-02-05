@@ -5,15 +5,13 @@
 <jsp:include page="../common/header.jsp" />
 <link rel="stylesheet" href="<c:url value='/resources/css/store_list.css'/>">
 <link rel="stylesheet" href="<c:url value='/resources/css/member.css'/>">
-<%-- main.css의 검색창 스타일 활용 --%>
 <link rel="stylesheet" href="<c:url value='/resources/css/main.css'/>">
 
 <div class="list-wrapper">
-    <%-- [추가] main.jsp의 검색 섹션을 상단에 배치하여 접근성 강화 --%>
+    <%-- 검색 섹션 --%>
     <div class="search-card" style="margin-bottom: 30px;">
         <h1 class="search-title" style="font-size: 1.5rem;">🔎 찾으시는 맛집이 있으신가요?</h1>
         <div class="search-form">
-            <%-- store_list.js의 엔터키 로직과 동기화되는 .wire-input 클래스 사용 --%>
             <input type="text" id="visibleKeyword" class="wire-input" 
                    placeholder="가게 이름 또는 메뉴 검색" value="${keyword}" required>
             <button type="button" class="btn-search" onclick="syncAndSubmit()">맛집 검색</button>
@@ -23,9 +21,9 @@
     <%-- 1. 필터 섹션 --%>
     <div class="filter-card">
         <form id="filterForm" action="${pageContext.request.contextPath}/store/list" method="get">
-            <%-- 페이징 및 검색 상태 유지를 위한 Hidden 필드 --%>
-            <input type="hidden" name="pageNum" id="pageNum" value="${pageMaker.cri.pageNum}">
-            <input type="hidden" name="amount" value="${pageMaker.cri.amount}">
+            <%-- [수정] PageInfo(pageMaker)의 속성을 사용하여 상태 유지 --%>
+            <input type="hidden" name="pageNum" id="pageNum" value="${pageMaker.pageNum}">
+            <input type="hidden" name="pageSize" value="${pageMaker.pageSize}">
             <input type="hidden" name="category" id="selectedCategory" value="${category}">
             <input type="hidden" name="keyword" id="hiddenKeyword" value="${keyword}">
 
@@ -65,7 +63,7 @@
                                 </c:when>
                                 <c:otherwise>
                                     <div class="no-img-placeholder">NO IMAGE</div>
-                                </c:otherwise>
+                                 </c:otherwise>
                             </c:choose>
                         </div>
                         <div class="store-info">
@@ -87,36 +85,66 @@
         </c:choose>
     </div>
 
-    <%-- 3. 페이징 섹션 --%>
+    <%-- 3. 페이징 섹션 (PageHelper PageInfo 기반으로 전면 수정) --%>
     <div class="pagination-container">
         <ul class="pagination">
-            <c:if test="${pageMaker.prev}">
+            <%-- 이전 페이지 버튼 --%>
+            <c:if test="${pageMaker.hasPreviousPage}">
                 <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${pageMaker.startPage - 1})">PREV</a>
+                     <a class="page-link" href="javascript:void(0);" onclick="movePage(${pageMaker.prePage})">PREV</a>
                 </li>
             </c:if>
 
-            <c:forEach var="num" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
-                <li class="page-item ${pageMaker.cri.pageNum == num ? 'active' : ''}">
+            <%-- 페이지 번호 목록 (PageInfo가 제공하는 navigatepageNums 사용) --%>
+            <c:forEach var="num" items="${pageMaker.navigatepageNums}">
+                <li class="page-item ${pageMaker.pageNum == num ? 'active' : ''}">
                     <a class="page-link" href="javascript:void(0);" onclick="movePage(${num})">${num}</a>
                 </li>
             </c:forEach>
 
-            <c:if test="${pageMaker.next}">
+            <%-- 다음 페이지 버튼 --%>
+             <c:if test="${pageMaker.hasNextPage}">
                 <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${pageMaker.endPage + 1})">NEXT</a>
+                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${pageMaker.nextPage})">NEXT</a>
                 </li>
             </c:if>
         </ul>
     </div>
 </div>
 
-<%-- 검색 버튼 클릭 시 동기화를 위한 보조 스크립트 --%>
 <script>
+/**
+ * 검색어 동기화 및 폼 제출
+ */
 function syncAndSubmit() {
     const visibleVal = document.getElementById('visibleKeyword').value;
     document.getElementById('hiddenKeyword').value = visibleVal;
-    resetPageAndSubmit(); // store_list.js의 기존 함수 호출
+    resetPageAndSubmit(); 
+}
+
+/**
+ * 페이지 이동 함수
+ */
+function movePage(num) {
+    document.getElementById('pageNum').value = num;
+    document.getElementById('filterForm').submit();
+}
+
+/**
+ * 카테고리 선택 시 페이지 초기화 후 제출
+ */
+function selectCategory(cat) {
+    const currentCat = document.getElementById('selectedCategory').value;
+    document.getElementById('selectedCategory').value = (currentCat === cat) ? "" : cat;
+    resetPageAndSubmit();
+}
+
+/**
+ * 필터 변경 시 1페이지부터 다시 조회
+ */
+function resetPageAndSubmit() {
+    document.getElementById('pageNum').value = 1;
+    document.getElementById('filterForm').submit();
 }
 </script>
 

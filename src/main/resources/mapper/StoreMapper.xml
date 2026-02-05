@@ -5,40 +5,27 @@
 
     <sql id="criteria">
         <trim prefix="AND (" suffix=")" prefixOverrides="AND |OR">
-            <if test="cri.category != null and cri.category != ''">
-                s.store_category = #{cri.category}
+            <if test="category != null and category != ''">
+                s.store_category = #{category}
             </if>
-            <if test="cri.region != null and cri.region != ''">
-                AND s.store_addr1 LIKE '%' || #{cri.region} || '%'
+            <if test="region != null and region != ''">
+                AND s.store_addr1 LIKE '%' || #{region} || '%'
             </if>
-            <if test="cri.keyword != null and cri.keyword != ''">
-                AND s.store_name LIKE '%' || #{cri.keyword} || '%'
+            <if test="keyword != null and keyword != ''">
+                AND s.store_name LIKE '%' || #{keyword} || '%'
             </if>
         </trim>
     </sql>
 
     <select id="getListStore" resultType="com.uhi.gourmet.store.StoreVO">
-        <![CDATA[
-        SELECT * FROM (
-            SELECT
-                rownum AS rn, 
-                inner_s.*
-            FROM (
-                SELECT 
-                    s.*,
-                    (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id) as review_cnt,
-                    (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
-                FROM STORE s
-                WHERE 1=1
-        ]]>
+        SELECT 
+            s.*,
+            (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id) as review_cnt,
+            (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
+        FROM STORE s
+        WHERE 1=1
         <include refid="criteria" />
-        <![CDATA[
-                ORDER BY s.store_id DESC
-            ) inner_s
-            WHERE rownum <= #{cri.pageNum} * #{cri.amount}
-        )
-        WHERE rn > (#{cri.pageNum} - 1) * #{cri.amount}
-        ]]>
+        ORDER BY s.store_id DESC
     </select>
 
     <select id="getTotalCount" resultType="int">
@@ -134,8 +121,7 @@
         ) VALUES (
             SEQ_MENU.NEXTVAL,
             #{store_id, jdbcType=NUMERIC},
-            #{menu_name, jdbcType=VARCHAR},
-            #{menu_price, jdbcType=NUMERIC},
+            #{keyword, jdbcType=VARCHAR}, #{menu_price, jdbcType=NUMERIC},
             #{menu_img, jdbcType=VARCHAR},
             #{menu_sign, jdbcType=VARCHAR}
         )
