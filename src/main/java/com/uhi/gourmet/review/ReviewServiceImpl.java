@@ -24,40 +24,37 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private StoreService store_service;
 
-    // [수정 포인트: 데이터 정화 로직 추가]
     @Override
     public void registerReview(ReviewVO vo, String userId) {
-        // 1. 권한 검증
         if (!checkReviewEligibility(userId, vo.getStore_id())) {
             throw new RuntimeException("방문 완료 후에만 리뷰를 작성할 수 있습니다.");
         }
         
-        // 2. [최소 수정] 외래키 제약 조건 위반(0 입력) 방지 로직 추가
-        // 폼 바인딩 시 0으로 들어온 Integer 값을 null로 변경하여 DB 에러 및 롤백을 막습니다.
+        // 외래키 0값 방지 (데이터 정화)
         if (vo.getBook_id() != null && vo.getBook_id() == 0) vo.setBook_id(null);
         if (vo.getWait_id() != null && vo.getWait_id() == 0) vo.setWait_id(null);
         
-        // 3. 데이터 세팅 및 저장
         vo.setUser_id(userId);
         review_mapper.insertReview(vo);
     }
 
-    // [수정] 특정 가게의 리뷰 목록 조회 (PageHelper 적용)
     @Override
     public PageInfo<ReviewVO> getStoreReviews(int store_id, int pageNum, int pageSize) {
-        // 페이징 시작 설정
         PageHelper.startPage(pageNum, pageSize);
-        
-        // Mapper 호출 (PageHelper에 의해 결과가 Page 객체로 반환됨)
         List<ReviewVO> list = review_mapper.selectStoreReviews(store_id);
-        
-        // PageInfo로 래핑하여 반환
         return new PageInfo<>(list);
     }
 
+    // [수정] 내 리뷰 목록 페이징 구현
     @Override
-    public List<ReviewVO> getMyReviews(String user_id) {
-        return review_mapper.selectMyReviews(user_id);
+    public PageInfo<ReviewVO> getMyReviewsPaginated(String user_id, int pageNum, int pageSize) {
+        // PageHelper를 통해 쿼리 가로채기
+        PageHelper.startPage(pageNum, pageSize);
+        
+        // Mapper의 기존 selectMyReviews를 그대로 호출해도 PageHelper가 페이징 쿼리로 변환함
+        List<ReviewVO> list = review_mapper.selectMyReviews(user_id);
+        
+        return new PageInfo<>(list);
     }
 
     @Override
@@ -72,28 +69,20 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public boolean checkReviewEligibility(String user_id, int store_id) {
-        int count = review_mapper.countFinishedVisits(user_id, store_id);
-        return count > 0;
+        return review_mapper.countFinishedVisits(user_id, store_id) > 0;
     }
 
-    // [수정 포인트: 컨트롤러의 데이터 가공 책임을 서비스로 이전]
     @Override
     public Map<String, Object> getReviewWriteContext(String userId, int storeId, Integer bookId, Integer waitId) {
         Map<String, Object> context = new HashMap<>();
-        
-        // 자격 검증
         if (!checkReviewEligibility(userId, storeId)) {
             context.put("isEligible", false);
             return context;
         }
-
-        // 가게 정보 및 요청 파라미터 조합
-        StoreVO store = store_service.getStoreDetail(storeId);
         context.put("isEligible", true);
-        context.put("store", store);
+        context.put("store", store_service.getStoreDetail(storeId));
         context.put("book_id", bookId);
         context.put("wait_id", waitId);
-        
         return context;
     }
 }

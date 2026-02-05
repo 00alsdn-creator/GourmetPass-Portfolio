@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.github.pagehelper.PageInfo; // 추가
 import com.uhi.gourmet.book.BookService;
 import com.uhi.gourmet.wait.WaitService;
 import com.uhi.gourmet.store.StoreMapper;
@@ -141,6 +142,10 @@ public class MemberController {
         return "redirect:/member/login";
     }
 
+    /**
+     * 마이페이지 메인
+     * 일반 사용자의 경우 최근 리뷰 3개만 요약해서 보여주도록 수정
+     */
     @GetMapping("/mypage")
     public String mypage(Principal principal, Model model, HttpServletRequest request) {
         String user_id = principal.getName();
@@ -154,16 +159,41 @@ public class MemberController {
                 model.addAttribute("menuList", storeMapper.getMenuList(store.getStore_id()));
                 model.addAttribute("store_book_list", book_service.get_store_book_list(store.getStore_id()));
                 
-                // [수정] PageInfo에서 List를 추출 (최근 10개 표시)
+                // 점주 마이페이지는 최근 리뷰 10개 표시
                 model.addAttribute("store_review_list", review_service.getStoreReviews(store.getStore_id(), 1, 10).getList());
             } else {
                 model.addAttribute("noStoreMsg", "등록된 매장 정보가 없습니다.");
             }
             return "member/mypage_owner";
         } else {
-            model.addAttribute("my_review_list", review_service.getMyReviews(user_id));
+            // [수정] 일반 사용자: 마이페이지용으로 최근 리뷰 3개만 로드 (PageHelper 활용)
+            PageInfo<ReviewVO> reviewPage = review_service.getMyReviewsPaginated(user_id, 1, 3);
+            
+            model.addAttribute("my_review_list", reviewPage.getList());
+            model.addAttribute("total_review_cnt", reviewPage.getTotal()); // UI에서 '전체보기(N)' 표시용
             return "member/mypage"; 
         }
+    }
+
+    /**
+     * [신규] 내가 쓴 리뷰 이력 전체 보기 (페이징 게시판)
+     */
+    @GetMapping("/review/mine")
+    public String myReviewList(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            Principal principal, Model model) {
+        
+        if (principal == null) return "redirect:/member/login";
+        
+        String user_id = principal.getName();
+        
+        // 한 페이지에 10개씩 출력하도록 설정
+        PageInfo<ReviewVO> pageMaker = review_service.getMyReviewsPaginated(user_id, pageNum, 10);
+        
+        model.addAttribute("allReviews", pageMaker.getList());
+        model.addAttribute("pageMaker", pageMaker);
+        
+        return "review/review_mine"; // 신규 JSP 경로
     }
 
     @GetMapping("/wait_status")
