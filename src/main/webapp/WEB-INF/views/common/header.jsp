@@ -9,16 +9,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gourmet Pass</title>
 
+    <meta name="app-context-path" content="${pageContext.request.contextPath}">
+    <meta name="csrf-name" content="${_csrf.parameterName}">
+    <meta name="csrf-token" content="${_csrf.token}">
+
     <link rel="stylesheet" href="<c:url value='/resources/css/common.css'/>">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <script>
-        const APP_CONFIG = {
-            contextPath: "${pageContext.request.contextPath}",
-            csrfName: "${_csrf.parameterName}",
-            csrfToken: "${_csrf.token}"
-        };
-    </script>
+    <script src="<c:url value='/resources/js/app-config.js'/>"></script>
 </head>
 <body>
     <nav class="wire-nav">
@@ -48,9 +45,9 @@
                         <a href="<c:url value='/member/mypage'/>" class="nav-item">[마이페이지]</a>
                     </sec:authorize>
                     
-                    <form action="<c:url value='/logout'/>" method="post" class="logout-form-inline" style="display:inline;">
+                    <form action="<c:url value='/logout'/>" method="post" class="logout-form-inline">
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                        <button type="submit" class="btn-logout-text" style="background:none; border:none; cursor:pointer; text-decoration:underline;">로그아웃</button>
+                        <button type="submit" class="btn-logout-text">로그아웃</button>
                     </form>
                 </sec:authorize>
             </div>

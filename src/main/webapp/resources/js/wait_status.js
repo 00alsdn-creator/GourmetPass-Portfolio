@@ -1,18 +1,66 @@
 $(document).ready(function() {
-    // 사용자 취소 이벤트
-    $(".user-cancel-btn").on("click", function() {
-        const pay_id = $(this).data("payid");   // 환불을위한 결제 ID 가져오기
-        const form = $(this).closest("form");   // 부모 폼 요소
-		
-    
-        if (confirm("예약 취소 처리하시겠습니까? 결제된 금액이 환불됩니다.")) {
-            // 1. 환불 함수 호출
-            cancelPay(pay_id, form);
-            // 취소 누르면 그냥 끝
+    const wrapper = document.querySelector(".wait-status-wrapper");
+    if (wrapper) {
+        const userId = wrapper.dataset.userId || "";
+        const activeStoreId = wrapper.dataset.activeStoreId || "";
+
+        if (typeof APP_CONFIG !== "undefined") {
+            APP_CONFIG.userId = userId;
+            APP_CONFIG.activeStoreId = activeStoreId;
         }
-        
+
+        if (userId) {
+            connectRealtime(userId, activeStoreId);
+        }
+    }
+
+    $(".user-cancel-btn").on("click", function() {
+        const pay_id = $(this).data("payid");
+        const form = $(this).closest("form");
+
+        if (confirm("예약 취소 처리하시겠습니까? 결제된 금액이 환불됩니다.")) {
+            cancelPay(pay_id, form);
+        }
+    });
+
+    $(".wait-cancel-btn").on("click", function() {
+        const waitId = $(this).data("wait-id");
+        if (waitId) {
+            cancelWait(waitId);
+        }
+    });
+
+    $(".js-alert").on("click", function() {
+        const message = $(this).data("message");
+        if (message) {
+            alert(message);
+        }
+    });
+
+    $(".js-review-link").on("click", function() {
+        const url = $(this).data("url");
+        if (url) {
+            location.href = url;
+        }
     });
 });
+
+function connectRealtime(userId, activeStoreId) {
+    if (typeof SockJS === "undefined" || typeof Stomp === "undefined") {
+        return;
+    }
+
+    const socket = new SockJS(APP_CONFIG.contextPath + "/ws_waiting");
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+
+    stompClient.connect({}, function() {
+        stompClient.subscribe("/topic/wait/" + userId, function() { location.reload(); });
+        if (activeStoreId) {
+            stompClient.subscribe("/topic/store/" + activeStoreId + "/waitUpdate", function() { location.reload(); });
+        }
+    }, function() { setTimeout(function() { connectRealtime(userId, activeStoreId); }, 5000); });
+}
     // 사용자의 예약 취소시의 환불 로직 JAVASCRIPT
 function cancelPay(pay_id, form) {	// pay_id 를 매개변수로 가져와서
     $.ajax({

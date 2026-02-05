@@ -1,0 +1,172 @@
+/* src/main/webapp/resources/css/wait_status.css */
+@charset "UTF-8";
+
+/* 이용 현황 전용 애니메이션 및 스타일 */
+.wait-status-wrapper { max-width: 900px; }
+
+.dining-mode {
+    border: 2px solid #2e7d32 !important;
+    background-color: #f1f8e9 !important;
+}
+
+.dining-msg {
+    font-size: 14px;
+    color: #2e7d32;
+    font-weight: 900;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.status-card {
+    margin-bottom: 25px;
+    transition: 0.3s;
+}
+
+.status-card:hover { transform: translateY(-5px); }
+
+.badge-ing {
+    background: #2e7d32;
+    color: #fff;
+}
+
+.badge-call {
+    background: #ff3d00;
+    color: #fff;
+    animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+    0% { transform: rotate(0); }
+    25% { transform: rotate(1deg); }
+    75% { transform: rotate(-1deg); }
+    100% { transform: rotate(0); }
+}
+
+.status-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-store-name {
+    font-size: 22px;
+    font-weight: 900;
+    margin: 10px 0;
+}
+
+.status-subtext {
+    font-size: 15px;
+    color: #555;
+}
+
+.status-highlight { color: #ff3d00; }
+
+.btn-danger-outline {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.history-actions-right { text-align: right; }
+
+.status-visit-label {
+    font-weight: 900;
+    font-size: 14px;
+    color: #2e7d32;
+    margin-bottom: 10px;
+}
+
+.btn-cancel {
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.status-empty {
+    text-align: center;
+    padding: 50px 0;
+    color: #999;
+    font-weight: 800;
+}
+
+.status-history-card { margin-top: 30px; }
+
+/* 히스토리 전용 스타일 */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.history-item:hover { background-color: #fafafa; }
+
+.history-info { flex: 1; }
+
+.history-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.history-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.history-tag {
+    font-size: 12px;
+    color: #999;
+    font-weight: 700;
+}
+
+.history-date {
+    font-size: 13px;
+    color: #666;
+}
+
+.history-store {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.btn-small {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-review {
+    background: #ff3d00;
+    color: #fff;
+    border: none;
+}
+
+.btn-payment {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.text-done {
+    color: #ccc;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.text-done--danger { color: #dc3545; }
+.text-done--success { color: #2e7d32; }
+.text-done--cancel { color: #bd2222; }
+.text-done--noshow { color: #B22222; }
