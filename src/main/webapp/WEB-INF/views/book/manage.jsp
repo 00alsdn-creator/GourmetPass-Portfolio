@@ -63,8 +63,7 @@
 									</c:when>
 								</c:choose></td>
 							<td align="center">
-								<form action="<c:url value='/store/wait/updateStatus'/>"
-									method="post" class="action-btn-group">
+								<form action="<c:url value='/wait/updateStatus'/>" method="post" class="action-btn-group">
 									<input type="hidden" name="wait_id" value="${wait.wait_id}">
 									<input type="hidden" name="user_id" value="${wait.user_id}">
 									<input type="hidden" name="${_csrf.parameterName}"
