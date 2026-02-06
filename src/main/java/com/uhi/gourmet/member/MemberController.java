@@ -188,7 +188,7 @@ public class MemberController {
         String user_id = principal.getName();
         
         // 한 페이지에 10개씩 출력하도록 설정
-        PageInfo<ReviewVO> pageMaker = review_service.getMyReviewsPaginated(user_id, pageNum, 10);
+        PageInfo<ReviewVO> pageMaker = review_service.getMyReviewsPaginated(user_id, pageNum, 3);
         
         model.addAttribute("allReviews", pageMaker.getList());
         model.addAttribute("pageMaker", pageMaker);
