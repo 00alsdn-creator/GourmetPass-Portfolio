@@ -23,9 +23,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo; // 추가
 import com.uhi.gourmet.book.BookService;
+import com.uhi.gourmet.book.BookVO;
 import com.uhi.gourmet.wait.WaitService;
+import com.uhi.gourmet.wait.WaitVO;
 import com.uhi.gourmet.store.StoreMapper;
 import com.uhi.gourmet.store.StoreVO;
 import com.uhi.gourmet.review.ReviewService; 
@@ -203,14 +206,36 @@ public class MemberController {
         return "wait/wait_status"; 
     }
     
+  
     /**
-     * [신규] 전체 이용 내역 페이지
+     * ★ 전체 이용 내역 페이지 (페이징 적용)
      */
     @GetMapping("/history")
-    public String myHistory(Principal principal, Model model) {
+    public String myHistory(
+            @RequestParam(value = "waitPage", defaultValue = "1") int waitPage,
+            @RequestParam(value = "bookPage", defaultValue = "1") int bookPage,
+            Principal principal, Model model) {
+        
         if (principal == null) return "redirect:/member/login";
-        model.addAllAttributes(memberService.getMyStatusSummary(principal.getName()));
-        return "wait/wait_history"; // 새로운 JSP
+        
+        String userId = principal.getName();
+        
+        // ★ 웨이팅 내역 페이징 (한 페이지에 5개)
+        PageHelper.startPage(waitPage, 5);
+        List<WaitVO> waitList = wait_service.get_my_wait_list(userId);
+        PageInfo<WaitVO> waitPageInfo = new PageInfo<>(waitList);
+        
+        // ★ 예약 내역 페이징 (한 페이지에 5개)
+        PageHelper.startPage(bookPage, 5);
+        List<BookVO> bookList = book_service.get_my_book_list(userId);
+        PageInfo<BookVO> bookPageInfo = new PageInfo<>(bookList);
+        
+        model.addAttribute("waitPageInfo", waitPageInfo);
+        model.addAttribute("bookPageInfo", bookPageInfo);
+        model.addAttribute("my_wait_list", waitList);
+        model.addAttribute("my_book_list", bookList);
+        
+        return "wait/wait_history";
     }
     
     

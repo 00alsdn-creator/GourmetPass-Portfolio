@@ -1,7 +1,7 @@
 /* src/main/webapp/resources/css/wait_status.css */
 @charset "UTF-8";
 
-/* 이용 현황 전용 애니메이션 및 스타일 */
+/* �씠�슜 �쁽�솴 �쟾�슜 �븷�땲硫붿씠�뀡 諛� �뒪���씪 */
 .wait-status-wrapper { max-width: 900px; }
 
 .dining-mode {
@@ -95,7 +95,7 @@
 
 .status-history-card { margin-top: 30px; }
 
-/* 히스토리 전용 스타일 */
+/* �엳�뒪�넗由� �쟾�슜 �뒪���씪 */
 .history-item {
     display: flex;
     justify-content: space-between;
@@ -139,6 +139,24 @@
     margin: 0;
 }
 
+/* 히스토리 섹션 구분 */
+.history-section {
+    margin-bottom: 30px;
+}
+
+.history-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.history-section:last-child {
+    margin-bottom: 0;
+}
+
 .btn-small {
     height: 32px;
     padding: 0 12px;
@@ -158,6 +176,48 @@
     background: #fff;
     color: #333;
     border: 1px solid #ddd;
+}
+
+/* wait_history 페이징 스타일 */
+/* 페이징 스타일 */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+.pagination-container .btn-wire {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 15px;
+    line-height: 38px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.pagination-container .btn-wire.active {
+    background-color: #FF6B6B;
+    color: white;
+    border-color: #FF6B6B;
+}
+
+.pagination-container .btn-wire:hover:not(.active) {
+    background-color: #f5f5f5;
+}
+
+.history-section {
+    margin-bottom: 30px;
+}
+
+.history-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
 .text-done {

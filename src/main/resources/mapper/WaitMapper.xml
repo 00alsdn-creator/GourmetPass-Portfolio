@@ -36,7 +36,7 @@
 		AND TO_CHAR(wait_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
 	</select>
 
-	<select id="selectMyWaitList"
+	<!-- <select id="selectMyWaitList"
 		resultType="com.uhi.gourmet.wait.WaitVO">
 		SELECT w.*, s.store_name, r.review_id
 		FROM WAIT w
@@ -44,7 +44,7 @@
 		LEFT OUTER JOIN REVIEW r ON w.wait_id = r.wait_id
 		WHERE w.user_id = #{user_id}
 		ORDER BY w.wait_date DESC
-	</select>
+	</select> -->
 
 	<select id="selectStoreWaitList"
 		resultType="com.uhi.gourmet.wait.WaitVO">
@@ -88,6 +88,19 @@
 </select>
 
 		
+    <!-- 내 웨이팅 목록 조회 (시간순 정렬) -->
+    <select id="selectMyWaitList" resultType="com.uhi.gourmet.wait.WaitVO">
+        SELECT 
+            w.wait_id, w.user_id, w.store_id, w.wait_date, w.wait_num,
+            w.people_cnt, w.wait_status,
+            s.store_name, s.store_img,
+            r.review_id
+        FROM WAIT w
+        LEFT JOIN STORE s ON w.store_id = s.store_id
+        LEFT JOIN REVIEW r ON w.wait_id = r.wait_id
+        WHERE w.user_id = #{user_id}
+        ORDER BY w.wait_date DESC  /* ★ 시간순 정렬 추가 */
+    </select>
 	
 		
 

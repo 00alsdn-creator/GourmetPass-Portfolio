@@ -127,109 +127,113 @@
 	</div>
 
 	<%-- 2. 이용 히스토리 (결제 및 리뷰 통합) --%>
-	<div class="dashboard-card status-history-card">
-		<div class="card-header"
-			style="display: flex; justify-content: space-between; align-items: center;">
-			<h3 class="card-title">📜 최근 이용 내역</h3>&nbsp;&nbsp;
-			<a href="<c:url value='/member/history'/>" class="btn-wire"
-				style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 12px; text-decoration: none; color: #333;">
-				전체보기 ❯ </a>
-		</div>
+	<%-- 2. 이용 히스토리 (결제 및 리뷰 통합) --%>
+<div class="dashboard-card status-history-card">
+    <div class="card-header"
+        style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title">📜 최근 이용 내역</h3>&nbsp;&nbsp;
+        <a href="<c:url value='/member/history'/>" class="btn-wire"
+            style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 12px; text-decoration: none; color: #333;">
+            전체보기 ❯ </a>
+    </div>
 
-		<div class="history-container">
-			<c:set var="displayCount" value="0" />
+    <div class="history-container">
+        <%-- 웨이팅 섹션 --%>
+        <c:if test="${not empty finishedWaits}">
+            <div class="history-section">
+                <h4 class="history-section-title">🚶 웨이팅</h4>
+                <c:forEach var="w" items="${finishedWaits}">
+                    <div class="history-item">
+                        <div class="history-info">
+                            <div class="history-meta">
+                                <span class="history-tag">[웨이팅]</span>
+                                <%-- ★ 시간 표시 수정: 시분 포함 --%>
+                                <span class="history-date">
+                                    <fmt:formatDate value="${w.wait_date}" pattern="yy.MM.dd HH:mm" />
+                                </span>
+                            </div>
+                            <h4 class="history-store">${w.store_name}</h4>
+                        </div>
 
-			<%-- 웨이팅 히스토리 --%>
-			<c:forEach var="w" items="${my_wait_list}">
-				<c:if test="${displayCount < 3}">
-					<div class="history-item">
-						<div class="history-info">
-							<div class="history-meta">
-								<span class="history-tag">[웨이팅]</span> <span
-									class="history-date"><fmt:formatDate
-										value="${w.wait_date}" pattern="yy.MM.dd" /></span>
-							</div>
-							<h4 class="history-store">${w.store_name}</h4>
-						</div>
+                        <div class="history-actions">
+                            <c:if test="${w.wait_status == 'FINISH'}">
+                                <c:choose>
+                                    <c:when test="${empty w.review_id}">
+                                        <button class="btn-small btn-review js-review-link"
+                                            data-url="<c:url value='/review/write?store_id=${w.store_id}&wait_id=${w.wait_id}'/>">리뷰 작성</button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="text-done">리뷰완료</span>
+                                        <button type="button" class="btn-delete-review"
+                                            data-review-id="${w.review_id}" data-store-id="${w.store_id}"
+                                            data-return-url="/member/wait_status">삭제</button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
+                            <c:if test="${w.wait_status == 'CANCELLED'}">
+                                <span class="text-done text-done--danger">취소됨</span>
+                            </c:if>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:if>
 
-						<div class="history-actions">
-							<%-- 리뷰 작성 버튼 (방문 완료 상태이고 리뷰가 없을 때만) --%>
-							<c:if test="${w.wait_status == 'FINISH'}">
-								<!-- 							<button class="btn-small btn-payment"
-								onclick="alert('결제/영수증 상세 페이지로 이동합니다.')">결제내역</button>
- -->
-								<c:choose>
-									<c:when test="${empty w.review_id}">
-										<button class="btn-small btn-review js-review-link"
-											data-url="<c:url value='/review/write?store_id=${w.store_id}&wait_id=${w.wait_id}'/>">리뷰
-											작성</button>
-									</c:when>
-									<c:otherwise>
-										<span class="text-done">리뷰완료</span>
-										<button type="button" class="btn-delete-review"
-											data-review-id="${w.review_id}" data-store-id="${w.store_id}"
-											data-return-url="/member/wait_status">삭제</button>
-									</c:otherwise>
+        <%-- 예약 섹션 --%>
+        <c:if test="${not empty finishedBooks}">
+            <div class="history-section">
+                <h4 class="history-section-title">📅 예약</h4>
+                <c:forEach var="b" items="${finishedBooks}">
+                    <div class="history-item">
+                        <div class="history-info">
+                            <div class="history-meta">
+                                <span class="history-tag">[예약]</span>
+                                <%-- ★ 시간 표시 수정: 시분 포함 --%>
+                                <span class="history-date">
+                                    <fmt:formatDate value="${b.book_date}" pattern="yy.MM.dd HH:mm" />
+                                </span>
+                            </div>
+                            <h4 class="history-store">${b.store_name}</h4>
+                        </div>
 
-								</c:choose>
-							</c:if>
-							<c:if test="${w.wait_status == 'CANCELLED'}">
-								<span class="text-done text-done--danger">취소됨</span>
-							</c:if>
-
-						</div>
-					</div>
-					<c:set var="displayCount" value="${displayCount + 1}" />
-				</c:if>
-			</c:forEach>
-
-			<%-- 예약 히스토리 --%>
-			<c:forEach var="b" items="${my_book_list}">
-				<c:if test="${displayCount < 3}">
-					<div class="history-item">
-						<div class="history-info">
-							<div class="history-meta">
-								<span class="history-tag">[예약]</span> <span class="history-date"><fmt:formatDate
-										value="${b.book_date}" pattern="yy.MM.dd" /></span>
-							</div>
-							<h4 class="history-store">${b.store_name}</h4>
-						</div>
-
-						<div class="history-actions">
-							<c:if test="${b.book_status == 'FINISH'}">
-								<button class="btn-small btn-payment js-alert"
-									data-message="결제 상세 정보를 확인합니다.">결제내역</button>
-								<c:choose>
-									<c:when test="${empty b.review_id}">
-										<button class="btn-small btn-review js-review-link"
-											data-url="<c:url value='/review/write?store_id=${b.store_id}&book_id=${b.book_id}'/>">리뷰
-											작성</button>
-									</c:when>
-									<c:otherwise>
-										<span class="text-done">리뷰완료</span>
-										<!-- ✨ 삭제 버튼 추가 -->
-										<button type="button" class="btn-delete-review"
-											data-review-id="${b.review_id}" data-store-id="${b.store_id}"
-											data-return-url="/member/wait_status">삭제</button>
-									</c:otherwise>
-								</c:choose>
-							</c:if>
-							<c:if test="${b.book_status == 'RESERVED'}">
-								<span class="text-done text-done--success">방문예정</span>
-							</c:if>
-							<c:if test="${b.book_status == 'CANCELED'}">
-								<span class="text-done text-done--cancel">예약취소</span>
-							</c:if>
-							<c:if test="${b.book_status == 'NOSHOW'}">
-								<span class="text-done text-done--noshow">NO-SHOW</span>
-							</c:if>
-						</div>
-					</div>
-					<c:set var="displayCount" value="${displayCount + 1}" />
-				</c:if>
-			</c:forEach>
-		</div>
-	</div>
+                        <div class="history-actions">
+                            <c:if test="${b.book_status == 'FINISH'}">
+                                <!-- <button class="btn-small btn-payment js-alert"
+                                    data-message="결제 상세 정보를 확인합니다.">결제내역</button> -->
+                                <c:choose>
+                                    <c:when test="${empty b.review_id}">
+                                        <button class="btn-small btn-review js-review-link"
+                                            data-url="<c:url value='/review/write?store_id=${b.store_id}&book_id=${b.book_id}'/>">리뷰 작성</button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="text-done">리뷰완료</span>
+                                        <button type="button" class="btn-delete-review"
+                                            data-review-id="${b.review_id}" data-store-id="${b.store_id}"
+                                            data-return-url="/member/wait_status">삭제</button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
+                            <c:if test="${b.book_status == 'RESERVED'}">
+                                <span class="text-done text-done--success">방문예정</span>
+                            </c:if>
+                            <c:if test="${b.book_status == 'CANCELED'}">
+                                <span class="text-done text-done--cancel">예약취소</span>
+                            </c:if>
+                            <c:if test="${b.book_status == 'NOSHOW'}">
+                                <span class="text-done text-done--noshow">NO-SHOW</span>
+                            </c:if>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:if>
+        
+        <%-- 내역이 없을 때 --%>
+        <c:if test="${empty finishedWaits and empty finishedBooks}">
+            <div class="status-empty">최근 이용 내역이 없습니다.</div>
+        </c:if>
+    </div>
+</div>
 </div>
 
 <script src="<c:url value='/resources/js/mypage.js'/>"></script>
