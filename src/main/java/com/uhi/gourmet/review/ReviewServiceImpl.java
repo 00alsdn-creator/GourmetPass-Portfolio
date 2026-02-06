@@ -61,6 +61,12 @@ public class ReviewServiceImpl implements ReviewService {
     public Map<String, Object> getReviewStats(int store_id) {
         return review_mapper.selectReviewStats(store_id);
     }
+    
+    @Override
+    public boolean canDeleteReview(int review_id, String user_id) {
+        String author = review_mapper.selectReviewAuthor(review_id);
+        return author != null && author.equals(user_id);
+    }
 
     @Override
     public void removeReview(int review_id) {

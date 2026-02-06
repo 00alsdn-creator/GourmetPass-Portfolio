@@ -18,6 +18,9 @@ public interface ReviewService {
 
     // 4. 가게별 리뷰 통계 (평균 별점, 총 리뷰 수)
     Map<String, Object> getReviewStats(int store_id);
+    
+    // 리뷰 삭제 권한 확인 (추가)
+    boolean canDeleteReview(int review_id, String user_id);
 
     // 5. 리뷰 삭제
     void removeReview(int review_id);

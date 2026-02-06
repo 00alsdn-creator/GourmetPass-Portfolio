@@ -10,6 +10,7 @@
 <%-- [관심사 분리] 공용 마이페이지 스타일 및 통합 스크립트 연결 --%>
 <link rel="stylesheet" href="<c:url value='/resources/css/mypage.css'/>">
 <link rel="stylesheet" href="<c:url value='/resources/css/member.css'/>">
+<link rel="stylesheet" href="<c:url value='/resources/css/review_list.css'/>">
 <script src="<c:url value='/resources/js/mypage.js'/>"></script>
 
 <div class="mypage-wrapper">
@@ -43,13 +44,15 @@
 	<hr class="section-divider">
 
 	<div class="dashboard-card">
-		<div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+		<div class="card-header"
+			style="display: flex; justify-content: space-between; align-items: center;">
 			<%-- [수정] 컨트롤러에서 전달받은 전체 개수(total_review_cnt) 표시 --%>
 			<h3 class="card-title">💬 최근 리뷰&nbsp;&nbsp;</h3>
-			
+
 			<%-- [추가] 전체보기 링크: 신규 생성할 전체 이력 페이지(/member/review/mine)로 연결 --%>
-			<a href="<c:url value='/member/review/mine'/>" class="btn-wire" 
-			   style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 12px; text-decoration: none; color: #333;">전체보기 ❯</a>
+			<a href="<c:url value='/member/review/mine'/>" class="btn-wire"
+				style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 12px; text-decoration: none; color: #333;">전체보기
+				❯</a>
 		</div>
 
 		<div class="review-list">
@@ -58,21 +61,26 @@
 					<c:forEach var="review" items="${my_review_list}" begin="0" end="1">
 						<%-- 최근 2개까지만 표시 --%>
 						<div class="item-card">
-							<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+							<div
+								style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
 								<div class="store-link-box">
-									<a href="<c:url value='/store/detail?storeId=${review.store_id}'/>"
+									<a
+										href="<c:url value='/store/detail?storeId=${review.store_id}'/>"
 										style="font-size: 18px; font-weight: 900; color: #333; text-decoration: none;">
-										🏨 ${review.store_name} <small style="font-weight: normal; color: #999;">❯</small>
+										🏨 ${review.store_name} <small
+										style="font-weight: normal; color: #999;">❯</small>
 									</a>
 									<div style="margin-top: 5px; color: #f1c40f;">
 										<c:forEach begin="1" end="${review.rating}">⭐</c:forEach>
 									</div>
 								</div>
-								<button type="button" class="btn-wire"
-									style="height: 32px; padding: 0 12px; font-size: 12px; color: #dc3545; border-color: #dc3545;"
-									onclick="confirmDeleteReview('${review.review_id}', '${review.store_id}')">삭제</button>
+								<button type="button" class="btn-delete-review"
+									data-review-id="${review.review_id}"
+									data-store-id="${review.store_id}"
+									data-return-url="/member/mypage">삭제</button>	
 							</div>
-							<p style="line-height: 1.6; font-size: 15px; color: #444; margin-bottom: 15px;">${review.content}</p>
+							<p
+								style="line-height: 1.6; font-size: 15px; color: #444; margin-bottom: 15px;">${review.content}</p>
 							<div style="font-size: 13px; color: #aaa; font-weight: 800;">
 								<fmt:formatDate value="${review.review_date}"
 									pattern="yyyy.MM.dd" />
@@ -81,13 +89,29 @@
 					</c:forEach>
 				</c:when>
 				<c:otherwise>
-					<div style="text-align: center; padding: 60px 0; color: #ccc; font-weight: 900;">
-						아직 작성된 리뷰 기록이 없습니다.
-					</div>
+					<div
+						style="text-align: center; padding: 60px 0; color: #ccc; font-weight: 900;">
+						아직 작성된 리뷰 기록이 없습니다.</div>
 				</c:otherwise>
 			</c:choose>
 		</div>
 	</div>
 </div>
+
+<script src="<c:url value='/resources/js/member_mypage.js'/>"></script>
+<script>
+	// 리뷰 삭제 버튼 이벤트 처리
+	document.addEventListener('click', function(e) {
+		if (e.target.classList.contains('btn-delete-review')) {
+			const reviewId = e.target.dataset.reviewId;
+			const storeId = e.target.dataset.storeId;
+			const returnUrl = e.target.dataset.returnUrl;
+
+			if (typeof confirmDeleteReview === 'function') {
+				confirmDeleteReview(reviewId, storeId, returnUrl);
+			}
+		}
+	});
+</script>
 
 <jsp:include page="../common/footer.jsp" />

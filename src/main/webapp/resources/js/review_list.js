@@ -36,16 +36,16 @@ document.addEventListener("DOMContentLoaded", function() {
      * member_mypage.js의 confirmDeleteReview 함수를 호출합니다.
      */
     wrapper.addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-delete-review')) {
-            const reviewId = e.target.dataset.reviewId;
-            const sId = e.target.dataset.storeId;
-            
-            // 전역 스코프에 선언된 공통 함수 호출
-            if (typeof confirmDeleteReview === 'function') {
-                confirmDeleteReview(reviewId, sId);
-            }
+    if (e.target.classList.contains('btn-delete-review')) {
+        const reviewId = e.target.dataset.reviewId;
+        const sId = e.target.dataset.storeId;
+        const returnUrl = e.target.dataset.returnUrl; // 추가
+        
+        if (typeof confirmDeleteReview === 'function') {
+            confirmDeleteReview(reviewId, sId, returnUrl); // returnUrl 전달
         }
-    });
+    }
+});
 
     /**
      * 4. 하단 네비게이션 버튼 이벤트

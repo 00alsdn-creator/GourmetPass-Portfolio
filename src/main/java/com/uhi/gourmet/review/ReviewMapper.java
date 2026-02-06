@@ -21,6 +21,9 @@ public interface ReviewMapper {
     
     // 5. 리뷰 삭제
     void deleteReview(@Param("review_id") int review_id);
+    
+    // 리뷰 작성자 확인 (추가)
+    String selectReviewAuthor(int review_id);
 
     // 6. 방문 완료(예약 또는 웨이팅) 횟수 조회 (리뷰 작성 자격 확인용)
     int countFinishedVisits(@Param("user_id") String user_id, @Param("store_id") int store_id);

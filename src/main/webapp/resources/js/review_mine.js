@@ -33,14 +33,14 @@ document.addEventListener("DOMContentLoaded", function() {
      * 리뷰 삭제 버튼 이벤트
      */
     wrapper.addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-delete-review')) {
-            const reviewId = e.target.dataset.reviewId;
-            const storeId = e.target.dataset.storeId;
-            
-            // member_mypage.js에 정의된 공통 삭제 함수 호출
-            if (typeof confirmDeleteReview === 'function') {
-                confirmDeleteReview(reviewId, storeId);
-            }
+    if (e.target.classList.contains('btn-delete-review')) {
+        const reviewId = e.target.dataset.reviewId;
+        const storeId = e.target.dataset.storeId;
+        const returnUrl = e.target.dataset.returnUrl; // 추가
+        
+        if (typeof confirmDeleteReview === 'function') {
+            confirmDeleteReview(reviewId, storeId, returnUrl); // returnUrl 전달
         }
-    });
+    }
+});
 });

@@ -46,9 +46,20 @@ function cancelWait(waitId) {
 /**
  * 리뷰 삭제 (공통)
  */
-function confirmDeleteReview(reviewId, storeId) {
+function confirmDeleteReview(reviewId, storeId, returnUrl) {  // ← returnUrl 파라미터 추가
     if (!confirm("이 리뷰를 삭제하시겠습니까?")) return;
-    submitPostForm('/review/delete', { 'review_id': reviewId, 'store_id': storeId });
+    
+    var params = { 
+        'review_id': reviewId, 
+        'store_id': storeId 
+    };
+    
+    // returnUrl이 있으면 추가
+    if (returnUrl) {
+        params['returnUrl'] = returnUrl;
+    }
+    
+    submitPostForm('/review/delete', params);
 }
 
 /**

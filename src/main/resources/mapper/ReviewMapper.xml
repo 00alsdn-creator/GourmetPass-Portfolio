@@ -46,6 +46,17 @@
         FROM REVIEW
         WHERE store_id = #{store_id}
     </select>
+    
+    
+    <!-- 리뷰 작성자 확인 쿼리 추가 -->
+    <select id="selectReviewAuthor" resultType="string">
+        SELECT 
+            COALESCE(b.user_id, w.user_id) as user_id
+        FROM REVIEW r
+        LEFT JOIN BOOK b ON r.book_id = b.book_id
+        LEFT JOIN WAIT w ON r.wait_id = w.wait_id
+        WHERE r.review_id = #{review_id}
+    </select>
 
     <delete id="deleteReview">
         DELETE FROM REVIEW WHERE review_id = #{review_id}

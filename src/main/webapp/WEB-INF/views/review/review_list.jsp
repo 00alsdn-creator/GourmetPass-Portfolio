@@ -37,30 +37,31 @@
             <c:when test="${not empty allReviews}">
                 <c:forEach var="rev" items="${allReviews}">
                     <div class="item-card">
-                        <div class="item-header">
-                            <div class="user-meta">
-                                <strong class="user-name">${rev.user_nm} <small>고객님</small></strong>
-                                <span class="stars">
-                                    <c:forEach begin="1" end="${rev.rating}">⭐</c:forEach>
-                                </span>
-                            </div>
-                            <div class="action-meta">
-                                <span class="date">
-                                    <fmt:formatDate value="${rev.review_date}" pattern="yyyy.MM.dd" />
-                                </span>
-                                
-                                <sec:authorize access="isAuthenticated()">
-                                    <c:if test="${rev.user_id == pageContext.request.userPrincipal.name or pageContext.request.isUserInRole('ROLE_OWNER')}">
-                                        <%-- 전용 함수 호출로 로직 분리 --%>
-                                        <button type="button" class="btn-delete-review" 
-                                                data-review-id="${rev.review_id}"
-                                                data-store-id="${rev.store_id}">삭제</button>
-                                    </c:if>
-                                </sec:authorize>
-                            </div>
-                        </div>
+						<div class="item-header">
+							<div class="user-meta">
+								<strong class="user-name">${rev.user_nm} <small>고객님</small></strong>
+								<span class="stars"> <c:forEach begin="1"
+										end="${rev.rating}">⭐</c:forEach>
+								</span>
+							</div>
+							<div class="action-meta">
+								<span class="date"> <fmt:formatDate
+										value="${rev.review_date}" pattern="yyyy.MM.dd" />
+								</span>
+								<sec:authorize access="isAuthenticated()">
+									<c:if
+										test="${rev.user_id == pageContext.request.userPrincipal.name}">
+										<button type="button" class="btn-delete-review"
+											data-review-id="${rev.review_id}"
+											data-store-id="${rev.store_id}"
+											data-return-url="/review/list?store_id=${rev.store_id}">삭제</button>
+									</c:if>
+								</sec:authorize>
 
-                        <div class="item-body">
+							</div>
+						</div>
+
+						<div class="item-body">
                             <c:if test="${not empty rev.img_url}">
                                 <div class="img-box">
                                     <img src="<c:url value='/upload/${rev.img_url}'/>">

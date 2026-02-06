@@ -202,7 +202,18 @@ public class MemberController {
         model.addAllAttributes(memberService.getMyStatusSummary(principal.getName()));
         return "wait/wait_status"; 
     }
-
+    
+    /**
+     * [신규] 전체 이용 내역 페이지
+     */
+    @GetMapping("/history")
+    public String myHistory(Principal principal, Model model) {
+        if (principal == null) return "redirect:/member/login";
+        model.addAllAttributes(memberService.getMyStatusSummary(principal.getName()));
+        return "wait/wait_history"; // 새로운 JSP
+    }
+    
+    
     @GetMapping("/edit")
     public String editPage(Principal principal, Model model) {
         model.addAttribute("member", memberService.getMember(principal.getName()));
