@@ -76,19 +76,19 @@
         <ul class="pagination">
             <c:if test="${pageMaker.hasPreviousPage}">
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${pageMaker.prePage}">PREV</a>
+                    <a class="page-link" href="<c:url value='/member/review/mine?pageNum=${pageMaker.prePage}'/>" data-page="${pageMaker.prePage}">PREV</a>
                 </li>
             </c:if>
 
             <c:forEach var="num" items="${pageMaker.navigatepageNums}">
                 <li class="page-item ${pageMaker.pageNum == num ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${num}">${num}</a>
+                    <a class="page-link" href="<c:url value='/member/review/mine?pageNum=${num}'/>" data-page="${num}">${num}</a>
                 </li>
             </c:forEach>
 
             <c:if test="${pageMaker.hasNextPage}">
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${pageMaker.nextPage}">NEXT</a>
+                    <a class="page-link" href="<c:url value='/member/review/mine?pageNum=${pageMaker.nextPage}'/>" data-page="${pageMaker.nextPage}">NEXT</a>
                 </li>
             </c:if>
         </ul>

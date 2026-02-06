@@ -12,11 +12,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const pagination = document.querySelector('.pagination');
     if (pagination) {
         pagination.addEventListener('click', function(e) {
-            e.preventDefault();
             const link = e.target.closest('.page-link');
             if (link) {
+                e.preventDefault();
                 const pageNum = link.dataset.page;
                 if (pageNum) {
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#') {
+                        location.href = href;
+                        return;
+                    }
                     // 나의 이력 페이지로 페이지 번호만 들고 이동
                     location.href = contextPath + "/member/review/mine?pageNum=" + pageNum;
                 }

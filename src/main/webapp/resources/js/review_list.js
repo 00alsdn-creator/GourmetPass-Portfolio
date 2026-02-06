@@ -15,12 +15,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const pagination = document.querySelector('.pagination');
     if (pagination) {
         pagination.addEventListener('click', function(e) {
-            e.preventDefault(); // 기본 앵커 동작(#) 방지
-            
             const link = e.target.closest('.page-link');
             if (link) {
+                e.preventDefault();
                 const pageNum = link.dataset.page;
                 if (pageNum) {
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#') {
+                        location.href = href;
+                        return;
+                    }
                     location.href = contextPath + "/review/list?store_id=" + storeId + "&pageNum=" + pageNum;
                 }
             }

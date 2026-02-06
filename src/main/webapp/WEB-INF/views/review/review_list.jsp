@@ -84,19 +84,34 @@
         <ul class="pagination">
             <c:if test="${pageMaker.hasPreviousPage}">
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${pageMaker.prePage}">PREV</a>
+                    <c:url var="prevUrl" value="/review/list">
+                        <c:param name="store_id" value="${store.store_id}" />
+                        <c:param name="pageNum" value="${pageMaker.prePage}" />
+                        <c:param name="pageSize" value="${pageMaker.pageSize}" />
+                    </c:url>
+                    <a class="page-link" href="${prevUrl}" data-page="${pageMaker.prePage}">PREV</a>
                 </li>
             </c:if>
 
             <c:forEach var="num" items="${pageMaker.navigatepageNums}">
                 <li class="page-item ${pageMaker.pageNum == num ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${num}">${num}</a>
+                    <c:url var="pageUrl" value="/review/list">
+                        <c:param name="store_id" value="${store.store_id}" />
+                        <c:param name="pageNum" value="${num}" />
+                        <c:param name="pageSize" value="${pageMaker.pageSize}" />
+                    </c:url>
+                    <a class="page-link" href="${pageUrl}" data-page="${num}">${num}</a>
                 </li>
             </c:forEach>
 
             <c:if test="${pageMaker.hasNextPage}">
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${pageMaker.nextPage}">NEXT</a>
+                    <c:url var="nextUrl" value="/review/list">
+                        <c:param name="store_id" value="${store.store_id}" />
+                        <c:param name="pageNum" value="${pageMaker.nextPage}" />
+                        <c:param name="pageSize" value="${pageMaker.pageSize}" />
+                    </c:url>
+                    <a class="page-link" href="${nextUrl}" data-page="${pageMaker.nextPage}">NEXT</a>
                 </li>
             </c:if>
         </ul>

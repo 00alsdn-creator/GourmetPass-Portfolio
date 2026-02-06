@@ -91,62 +91,47 @@
             <%-- 이전 페이지 버튼 --%>
             <c:if test="${pageMaker.hasPreviousPage}">
                 <li class="page-item">
-                     <a class="page-link" href="javascript:void(0);" onclick="movePage(${pageMaker.prePage})">PREV</a>
+                    <c:url var="prevUrl" value="/store/list">
+                        <c:param name="pageNum" value="${pageMaker.prePage}" />
+                        <c:param name="pageSize" value="${pageMaker.pageSize}" />
+                        <c:param name="category" value="${category}" />
+                        <c:param name="region" value="${region}" />
+                        <c:param name="keyword" value="${keyword}" />
+                    </c:url>
+                     <a class="page-link" href="${prevUrl}" data-page="${pageMaker.prePage}">PREV</a>
                 </li>
             </c:if>
 
             <%-- 페이지 번호 목록 (PageInfo가 제공하는 navigatepageNums 사용) --%>
             <c:forEach var="num" items="${pageMaker.navigatepageNums}">
                 <li class="page-item ${pageMaker.pageNum == num ? 'active' : ''}">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${num})">${num}</a>
+                    <c:url var="pageUrl" value="/store/list">
+                        <c:param name="pageNum" value="${num}" />
+                        <c:param name="pageSize" value="${pageMaker.pageSize}" />
+                        <c:param name="category" value="${category}" />
+                        <c:param name="region" value="${region}" />
+                        <c:param name="keyword" value="${keyword}" />
+                    </c:url>
+                    <a class="page-link" href="${pageUrl}" data-page="${num}">${num}</a>
                 </li>
             </c:forEach>
 
             <%-- 다음 페이지 버튼 --%>
              <c:if test="${pageMaker.hasNextPage}">
                 <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${pageMaker.nextPage})">NEXT</a>
+                    <c:url var="nextUrl" value="/store/list">
+                        <c:param name="pageNum" value="${pageMaker.nextPage}" />
+                        <c:param name="pageSize" value="${pageMaker.pageSize}" />
+                        <c:param name="category" value="${category}" />
+                        <c:param name="region" value="${region}" />
+                        <c:param name="keyword" value="${keyword}" />
+                    </c:url>
+                    <a class="page-link" href="${nextUrl}" data-page="${pageMaker.nextPage}">NEXT</a>
                 </li>
             </c:if>
         </ul>
     </div>
 </div>
-
-<script>
-/**
- * 검색어 동기화 및 폼 제출
- */
-function syncAndSubmit() {
-    const visibleVal = document.getElementById('visibleKeyword').value;
-    document.getElementById('hiddenKeyword').value = visibleVal;
-    resetPageAndSubmit(); 
-}
-
-/**
- * 페이지 이동 함수
- */
-function movePage(num) {
-    document.getElementById('pageNum').value = num;
-    document.getElementById('filterForm').submit();
-}
-
-/**
- * 카테고리 선택 시 페이지 초기화 후 제출
- */
-function selectCategory(cat) {
-    const currentCat = document.getElementById('selectedCategory').value;
-    document.getElementById('selectedCategory').value = (currentCat === cat) ? "" : cat;
-    resetPageAndSubmit();
-}
-
-/**
- * 필터 변경 시 1페이지부터 다시 조회
- */
-function resetPageAndSubmit() {
-    document.getElementById('pageNum').value = 1;
-    document.getElementById('filterForm').submit();
-}
-</script>
 
 <script src="${pageContext.request.contextPath}/resources/js/store_list.js"></script>
 <jsp:include page="../common/footer.jsp" />
