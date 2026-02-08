@@ -23,9 +23,17 @@
         addr: "${loginUser.user_addr1} ${loginUser.user_addr2}",
         post: "${loginUser.user_zip}",
         portOneStoreId: "${portOneStoreId}",
-        portOneChannelKey: "${portOneChannelKey}"
+        portOneChannelKey: "${portOneChannelKey}",
+        isOwner: false
     };
 </script>
+<sec:authorize access="hasRole('ROLE_OWNER')">
+    <script type="text/javascript">
+        if (window.loginUserInfo) {
+            window.loginUserInfo.isOwner = true;
+        }
+    </script>
+</sec:authorize>
 
 <div class="detail-wrapper" id="storeDetailApp"
      data-store-id="${store.store_id}" data-lat="${store.store_lat}"
@@ -42,6 +50,7 @@
             <span class="badge-cat">${store.store_category}</span>
             <span class="rating-box">⭐ <b>${store.avg_rating}</b> (${store.review_cnt}개의 리뷰)</span>
             <span class="favorite-count" id="favoriteCount">❤️ 0</span>
+            <span class="viewer-count" id="viewerCount">👥 0명</span>
             <button type="button" class="favorite-inline" id="favoriteBtn">🤍 즐겨찾기</button>
             <button type="button" class="share-inline" id="copyLinkBtn">🔗 링크 복사</button>
         </div>
@@ -236,6 +245,8 @@
 
 <%-- 필수 라이브러리 및 스크립트 연동 --%>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoJsKey}&libraries=services"></script>
 <script src="<c:url value='/resources/js/store_detail.js'/>"></script>

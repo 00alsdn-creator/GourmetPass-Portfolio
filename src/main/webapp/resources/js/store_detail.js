@@ -110,6 +110,12 @@ window.checkAccount = function () {
         return false;
     }
 
+    //1-1. 점주 계정은 예약/웨이팅 불가
+    if (loginUserInfo.isOwner) {
+        alert("점주 계정은 예약/웨이팅을 할 수 없습니다.");
+        return false;
+    }
+
     //2. 점주 본인 매장 예약, 웨이팅 시도한 경우
     if (loginUserInfo.loginUserId === ownerId) {
         alert("본인 매장은 예약/웨이팅을 할 수 없습니다.");
@@ -298,6 +304,8 @@ $(document).ready(function () {
                     window.loadAvailableSlots();
                 } else if (result === "DUPLICATE_USER") {
                     alert("해당 날짜에 이미 예약 내역이 존재합니다.");
+                } else if (result === "OWNER_NOT_ALLOWED") {
+                    alert("점주 계정은 예약을 할 수 없습니다.");
                 } else {
                     alert("예약 정보를 확인하는 중 문제가 발생했습니다.");
                 }
@@ -420,4 +428,18 @@ $(document).ready(function () {
 
     // 5. 초기 슬롯 실행
     window.loadAvailableSlots();
+
+    if (typeof SockJS !== "undefined" && typeof Stomp !== "undefined") {
+        const storeId = app.dataset.storeId;
+        const socket = new SockJS(app.dataset.context + "/ws_waiting");
+        const stomp = Stomp.over(socket);
+        stomp.connect({}, function () {
+            stomp.subscribe("/topic/store/" + storeId + "/viewers", function (message) {
+                const count = parseInt(message.body, 10);
+                if (!Number.isNaN(count)) {
+                    $("#viewerCount").text("👥 " + count + "명");
+                }
+            });
+        });
+    }
 });

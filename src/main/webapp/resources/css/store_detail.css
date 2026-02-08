@@ -25,6 +25,10 @@
     font-weight: 900;
     color: #ff3d00;
 }
+.viewer-count {
+    font-weight: 900;
+    color: #333;
+}
 .share-inline {
     border: 2px solid #333;
     background: #fff;

@@ -5,6 +5,8 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -49,9 +51,14 @@ public class WaitController {
      * [2] 웨이팅 등록
      */
     @PostMapping("/register")
-    public String register_wait(WaitVO vo, Principal principal, Model model) {
+    public String register_wait(WaitVO vo, Principal principal, Model model, HttpServletRequest request) {
         if (principal == null) {
             return "redirect:/member/login";
+        }
+        if (request.isUserInRole("ROLE_OWNER")) {
+            model.addAttribute("msg", "점주 계정은 웨이팅을 할 수 없습니다.");
+            model.addAttribute("url", "/store/detail?storeId=" + vo.getStore_id());
+            return "common/alert";
         }
         
         String user_id = principal.getName();

@@ -18,5 +18,4 @@ public class FavoriteVO {
     private String store_category;
     private double avg_rating;
 
-
 }

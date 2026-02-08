@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -116,13 +117,15 @@ public class BookController {
 //    }
 	@GetMapping("/api/checkDuplicate")
 	@ResponseBody
-	public String checkDuplicate(@RequestParam("store_id") int storeId, 
-	                             @RequestParam("book_date") String bookDate,
-	                             @RequestParam("book_time") String bookTime,
-	                             Principal principal) {
-		System.out.println("중복체크 Controller 시작...");
-		
-	    if (principal == null) return "LOGIN_REQUIRED";
+    public String checkDuplicate(@RequestParam("store_id") int storeId, 
+                                 @RequestParam("book_date") String bookDate,
+                                 @RequestParam("book_time") String bookTime,
+                                 Principal principal,
+                                 HttpServletRequest request) {
+        System.out.println("중복체크 Controller 시작...");
+        
+        if (principal == null) return "LOGIN_REQUIRED";
+        if (request.isUserInRole("ROLE_OWNER")) return "OWNER_NOT_ALLOWED";
 	    
 	    //userId추출을 위해
 	    String userId = principal.getName();
@@ -140,15 +143,20 @@ public class BookController {
 	}
 	
 	@PostMapping("/register")
-	public String register_book(Principal principal, @RequestParam("store_id") int store_id,
-			@RequestParam("book_date") String date, @RequestParam("book_time") String time,
-			@RequestParam("pay_id") String pay_id,
-			@RequestParam(value = "people_cnt", defaultValue = "1") int people_cnt,
-			@RequestParam(value = "book_price", required = false, defaultValue = "0") int book_price,
-			RedirectAttributes rttr) {
+    public String register_book(Principal principal, @RequestParam("store_id") int store_id,
+            @RequestParam("book_date") String date, @RequestParam("book_time") String time,
+            @RequestParam("pay_id") String pay_id,
+            @RequestParam(value = "people_cnt", defaultValue = "1") int people_cnt,
+            @RequestParam(value = "book_price", required = false, defaultValue = "0") int book_price,
+            RedirectAttributes rttr,
+            HttpServletRequest request) {
 		System.out.println("Book register Controller...");
 		
-		if (principal == null) return "redirect:/member/login";
+        if (principal == null) return "redirect:/member/login";
+        if (request.isUserInRole("ROLE_OWNER")) {
+            rttr.addFlashAttribute("msg", "점주 계정은 예약을 할 수 없습니다.");
+            return "redirect:/store/detail?storeId=" + store_id;
+        }
 		
 		System.out.println("date : " + date);
 		System.out.println("time : " + time);
