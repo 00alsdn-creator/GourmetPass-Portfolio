@@ -90,4 +90,63 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+    const favoriteButtons = document.querySelectorAll(".favorite-toggle");
+    if (!favoriteButtons.length) return;
+
+    const contextPath = (typeof APP_CONFIG !== "undefined" && APP_CONFIG.contextPath)
+        ? APP_CONFIG.contextPath
+        : "";
+
+    function updateFavoriteButton(btn, isFavorite) {
+        if (isFavorite) {
+            btn.classList.add("active");
+            btn.textContent = "❤️";
+        } else {
+            btn.classList.remove("active");
+            btn.textContent = "🤍";
+        }
+    }
+
+    function loadFavorites() {
+        $.ajax({
+            url: contextPath + "/favorite/list",
+            type: "GET",
+            dataType: "json"
+        }).done(function(res) {
+            const storeIds = new Set((res.storeIds || []).map(String));
+            favoriteButtons.forEach(function(btn) {
+                const storeId = btn.dataset.storeId;
+                updateFavoriteButton(btn, storeIds.has(String(storeId)));
+            });
+        });
+    }
+
+    favoriteButtons.forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            $.ajax({
+                url: contextPath + "/favorite/toggle",
+                type: "POST",
+                data: {store_id: btn.dataset.storeId},
+                beforeSend: function(xhr) {
+                    if (typeof APP_CONFIG !== "undefined") {
+                        xhr.setRequestHeader("X-CSRF-TOKEN", APP_CONFIG.csrfToken);
+                    }
+                }
+            }).done(function(res) {
+                updateFavoriteButton(btn, !!res.favorite);
+            }).fail(function(xhr) {
+                if (xhr.status === 401) {
+                    alert("로그인이 필요합니다");
+                } else {
+                    alert("즐겨찾기 처리 중 오류가 발생했습니다.");
+                }
+            });
+        });
+    });
+
+    loadFavorites();
 });

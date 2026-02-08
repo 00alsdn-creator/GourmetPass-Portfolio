@@ -1,17 +1,17 @@
 <%-- WEB-INF/views/member/signup_owner2.jsp --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%> 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<jsp:include page="../common/header.jsp" />
+<jsp:include page="../common/header.jsp"/>
 <link rel="stylesheet" href="<c:url value='/resources/css/member.css'/>">
 
 <div class="edit-wrapper">
     <div class="edit-title">🍱 점주 가입 - 2단계 (가게 정보)</div>
     <p class="text-center mb-20">운영하실 매장의 정보를 상세히 입력해주세요.</p>
-    
+
     <form action="${pageContext.request.contextPath}/member/signup/ownerFinal" method="post" id="ownerStep2Form">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <%-- 좌표 정보 저장용 숨김 필드: DB 스키마 NUMBER(10, 7) 대응 [cite: 2] --%>
         <input type="hidden" name="store_lat" id="store_lat" value="0.0">
         <input type="hidden" name="store_lon" id="store_lon" value="0.0">
@@ -37,13 +37,15 @@
             </tr>
             <tr>
                 <th>가게 번호</th>
-                <td><input type="text" name="store_tel" required placeholder="02-123-4567" oninput="autoHyphen(this)" maxlength="13"></td>
+                <td><input type="text" name="store_tel" required placeholder="02-123-4567" oninput="autoHyphen(this)"
+                           maxlength="13"></td>
             </tr>
             <tr>
                 <th>가게 위치</th>
                 <td>
                     <div class="input-row mb-10">
-                        <input type="text" name="store_zip" id="store_zip" style="width:120px; flex:none;" readonly placeholder="우편번호">
+                        <input type="text" name="store_zip" id="store_zip" style="width:120px; flex:none;" readonly
+                               placeholder="우편번호">
                         <button type="button" onclick="execDaumPostcode('store')" class="btn-wire">위치 검색</button>
                     </div>
                     <input type="text" name="store_addr1" id="store_addr1" class="mb-10" readonly placeholder="기본 주소">
@@ -84,8 +86,16 @@
                 </td>
             </tr>
             <tr>
+                <th>최대 수용 인원</th>
+                <td>
+                    <input type="number" name="max_capacity" required placeholder="0 명" oninput="autoHyphen(this)"
+                           minlength="1">
+                </td>
+            </tr>
+            <tr>
                 <th>가게 소개</th>
-                <td><textarea name="store_desc" rows="5" style="resize:none;" placeholder="매장의 특징을 간단히 소개해 주세요."></textarea></td>
+                <td><textarea name="store_desc" rows="5" style="resize:none;"
+                              placeholder="매장의 특징을 간단히 소개해 주세요."></textarea></td>
             </tr>
         </table>
 
@@ -111,4 +121,4 @@
 <%-- [교정] member.js를 제거하고 통합된 member-signup.js 연결 --%>
 <script src="<c:url value='/resources/js/member-signup.js'/>"></script>
 
-<jsp:include page="../common/footer.jsp" />
+<jsp:include page="../common/footer.jsp"/>

@@ -50,6 +50,7 @@ public interface StoreMapper {
     void deleteMenu(int menu_id);
     void updateMenu(MenuVO menu);
     MenuVO getMenuDetail(int menu_id);
+    int countMenuName(@Param("store_id") int store_id, @Param("menu_name") String menu_name);
 
     // [10] 특정 날짜에 점유된 예약 시간 리스트 조회
     List<String> getBookedTimes(@Param("store_id") int store_id, 

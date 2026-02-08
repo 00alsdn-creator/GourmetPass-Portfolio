@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://www.springframework.org/security/tags"
 	prefix="sec"%>
 
@@ -42,6 +43,49 @@
 			📅 나 의 이 용 현 황 (예약 / 웨이팅) </a>
 	</div>
 	<hr class="section-divider">
+
+	<div class="dashboard-card">
+		<div class="card-header"
+			style="display: flex; justify-content: space-between; align-items: center;">
+			<h3 class="card-title">❤️ 내 즐겨찾기</h3>
+			<span class="favorite-count">총 ${fn:length(favorite_list)}개</span>
+		</div>
+		<div class="favorite-grid">
+			<c:choose>
+				<c:when test="${not empty favorite_list}">
+					<c:forEach var="fav" items="${favorite_list}">
+						<div class="favorite-card" data-store-id="${fav.store_id}">
+							<button type="button" class="favorite-remove"
+								data-store-id="${fav.store_id}">삭제</button>
+							<a class="favorite-link"
+								href="<c:url value='/store/detail?storeId=${fav.store_id}'/>">
+								<div class="favorite-thumb">
+									<c:choose>
+										<c:when test="${not empty fav.store_img}">
+											<img src="<c:url value='/upload/${fav.store_img}'/>" alt="${fav.store_name}">
+										</c:when>
+										<c:otherwise>
+											<div class="no-img-placeholder">NO IMAGE</div>
+										</c:otherwise>
+									</c:choose>
+								</div>
+								<div class="favorite-info">
+									<span class="badge-cat">${fav.store_category}</span>
+									<div class="favorite-name">${fav.store_name}</div>
+									<div class="favorite-meta">⭐ ${fav.avg_rating}</div>
+								</div>
+							</a>
+						</div>
+					</c:forEach>
+				</c:when>
+				<c:otherwise>
+					<div class="empty-status-box"
+						style="grid-column: 1/-1; text-align: center; padding: 40px 0; color: #ccc; font-weight: 900;">
+						즐겨찾기에 등록된 매장이 없습니다.</div>
+				</c:otherwise>
+			</c:choose>
+		</div>
+	</div>
 
 	<div class="dashboard-card">
 		<div class="card-header"
@@ -110,6 +154,34 @@
 			if (typeof confirmDeleteReview === 'function') {
 				confirmDeleteReview(reviewId, storeId, returnUrl);
 			}
+		}
+	});
+
+	document.addEventListener('click', function(e) {
+		if (e.target.classList.contains('favorite-remove')) {
+			e.preventDefault();
+			const storeId = e.target.dataset.storeId;
+			const card = e.target.closest('.favorite-card');
+
+			fetch(APP_CONFIG.contextPath + '/favorite/toggle', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+					'X-CSRF-TOKEN': APP_CONFIG.csrfToken
+				},
+				body: new URLSearchParams({ store_id: storeId })
+			}).then(function(res) {
+				if (!res.ok) {
+					throw new Error('favorite-toggle-failed');
+				}
+				return res.json();
+			}).then(function(data) {
+				if (!data.favorite && card) {
+					card.remove();
+				}
+			}).catch(function() {
+				alert('즐겨찾기 해제 중 오류가 발생했습니다.');
+			});
 		}
 	});
 </script>

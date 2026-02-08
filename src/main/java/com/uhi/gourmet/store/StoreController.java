@@ -19,11 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.github.pagehelper.PageInfo;
 import com.uhi.gourmet.book.BookService;
 import com.uhi.gourmet.member.MemberService;
 import com.uhi.gourmet.member.MemberVO;
+import com.uhi.gourmet.photo.PhotoService;
+import com.uhi.gourmet.photo.PhotoVO;
 import com.uhi.gourmet.review.ReviewService;
 import com.uhi.gourmet.review.ReviewVO;
 import com.uhi.gourmet.wait.WaitService;
@@ -50,6 +53,9 @@ public class StoreController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private PhotoService photoService;
+
     @Value("${kakao.js.key}")
     private String kakaoJsKey;
     
@@ -68,6 +74,12 @@ public class StoreController {
             Model model) {
         
         PageInfo<StoreVO> pageMaker = storeService.getStoreList(pageNum, pageSize, category, region, keyword);
+        for (StoreVO store : pageMaker.getList()) {
+            PhotoVO thumbnail = photoService.getThumbnailByStore(store.getStore_id());
+            if (thumbnail != null) {
+                store.setStore_img(thumbnail.getFile_path());
+            }
+        }
         model.addAttribute("storeList", pageMaker.getList()); 
         model.addAttribute("pageMaker", pageMaker);
         model.addAttribute("category", category);
@@ -85,6 +97,9 @@ public class StoreController {
         
         storeService.plusViewCount(storeId);
         StoreVO store = storeService.getStoreDetail(storeId);
+        if (store != null && store.getMax_capacity() < 1) {
+            store.setMax_capacity(1);
+        }
         model.addAttribute("currentWaitCount", waitService.get_current_wait_count(storeId));
 
         Map<String, Object> stats = reviewService.getReviewStats(storeId);
@@ -95,10 +110,12 @@ public class StoreController {
 
         // [수정] PageInfo에서 첫 페이지 2개만 추출 (pageSize를 3에서 2로 변경)
         List<ReviewVO> reviewList = reviewService.getStoreReviews(storeId, 1, 2).getList();
+        List<PhotoVO> photoList = photoService.getPhotosByStore(storeId);
         
         model.addAttribute("store", store);
         model.addAttribute("menuList", storeService.getMenuList(storeId));
         model.addAttribute("reviewList", reviewList);
+        model.addAttribute("photoList", photoList);
         model.addAttribute("kakaoJsKey", kakaoJsKey);
         model.addAttribute("portOneStoreId", portOneStoreId);
         model.addAttribute("portOneChannelKey", portOneChannelKey);
@@ -148,11 +165,20 @@ public class StoreController {
     }
 
     @PostMapping("/update")
-    public String updateStoreProcess(@ModelAttribute StoreVO vo, @RequestParam(value="file", required=false) MultipartFile file, HttpServletRequest request, Principal principal) {
+    public String updateStoreProcess(@ModelAttribute StoreVO vo,
+                                     @RequestParam(value="file", required=false) MultipartFile file,
+                                     HttpServletRequest request,
+                                     Principal principal,
+                                     RedirectAttributes rttr) {
         if (file != null && !file.isEmpty()) {
             vo.setStore_img(storeService.uploadFile(file, request.getSession().getServletContext().getRealPath("/resources/upload")));
         }
-        storeService.modifyStore(vo, principal.getName());
+        try {
+            storeService.modifyStore(vo, principal.getName());
+        } catch (RuntimeException e) {
+            rttr.addFlashAttribute("msg", e.getMessage());
+            return "redirect:/store/update?store_id=" + vo.getStore_id();
+        }
         return "redirect:/member/mypage";
     }
 
@@ -164,11 +190,23 @@ public class StoreController {
     }
 
     @PostMapping("/menu/register")
-    public String menuRegisterProcess(@ModelAttribute MenuVO menuVO, @RequestParam(value="file", required=false) MultipartFile file, HttpServletRequest request, Principal principal) {
+    public String menuRegisterProcess(@ModelAttribute MenuVO menuVO,
+                                      @RequestParam(value="file", required=false) MultipartFile file,
+                                      HttpServletRequest request,
+                                      Principal principal,
+                                      RedirectAttributes rttr) {
+        if (principal == null) {
+            return "redirect:/member/login";
+        }
         if (file != null && !file.isEmpty()) {
             menuVO.setMenu_img(storeService.uploadFile(file, request.getSession().getServletContext().getRealPath("/resources/upload")));
         }
-        storeService.addMenu(menuVO, principal.getName());
+        try {
+            storeService.addMenu(menuVO, principal.getName());
+        } catch (RuntimeException e) {
+            rttr.addFlashAttribute("msg", e.getMessage());
+            return "redirect:/store/menu/register?store_id=" + menuVO.getStore_id();
+        }
         return "redirect:/member/mypage"; 
     }
 

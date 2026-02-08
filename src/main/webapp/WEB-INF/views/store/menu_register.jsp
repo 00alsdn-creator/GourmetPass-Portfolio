@@ -5,6 +5,12 @@
 
 <%-- [원칙 1] 고메패스 통합 스타일시트 연결 --%>
 <link rel="stylesheet" href="<c:url value='/resources/css/member.css'/>">
+<script type="text/javascript">
+    var msg = "${msg}";
+    if (msg && msg !== "null" && msg !== "") {
+        alert(msg);
+    }
+</script>
 
 <div class="edit-wrapper">
     <div class="edit-title">➕ 메뉴 등록</div>
@@ -35,7 +41,7 @@
                 <th>가격</th>
                 <td>
                     <input type="number" name="menu_price" class="login-input" 
-                           required placeholder="판매 가격을 입력하세요">
+                           min="0" required placeholder="판매 가격을 입력하세요">
                 </td>
             </tr>
             <tr>

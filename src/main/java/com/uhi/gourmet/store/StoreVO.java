@@ -22,6 +22,7 @@ public class StoreVO {
     private String open_time;
     private String close_time;
     private int res_unit;
+    private int max_capacity; // 매장 최대 수용인원
 
     // [통계용 추가 필드] 명칭 통일 규칙 적용
     private double avg_rating;      // 평균 별점

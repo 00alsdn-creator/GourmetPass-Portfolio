@@ -52,6 +52,7 @@
                                         <div class="no-img-placeholder">NO IMAGE</div>
                                     </c:otherwise>
                                 </c:choose>
+                                <button type="button" class="favorite-toggle" data-store-id="${store.store_id}">🤍</button>
                             </div>
                             <div class="store-info">
                                 <div class="badge-cat">${store.store_category}</div>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uhi.gourmet.photo.PhotoMapper">
+
+    <insert id="insertPhoto">
+        INSERT INTO PHOTO (
+            photo_id, store_id, file_path, original_name,
+            is_thumbnail, is_active, sort_order, created_at
+        ) VALUES (
+            SEQ_PHOTO.NEXTVAL,
+            #{store_id, jdbcType=INTEGER},
+            #{file_path, jdbcType=VARCHAR},
+            #{original_name, jdbcType=VARCHAR},
+            #{is_thumbnail, jdbcType=CHAR},
+            #{is_active, jdbcType=CHAR},
+            #{sort_order, jdbcType=INTEGER},
+            SYSDATE
+        )
+    </insert>
+
+    <select id="selectPhotosByStore" resultType="com.uhi.gourmet.photo.PhotoVO">
+        SELECT
+            photo_id,
+            store_id,
+            file_path,
+            original_name,
+            is_thumbnail,
+            is_active,
+            sort_order,
+            created_at,
+            updated_at
+        FROM PHOTO
+        WHERE store_id = #{store_id}
+          AND is_active = 'Y'
+        ORDER BY is_thumbnail DESC, sort_order ASC, photo_id DESC
+    </select>
+
+    <select id="selectPhotosByStoreAll" resultType="com.uhi.gourmet.photo.PhotoVO">
+        SELECT
+            photo_id,
+            store_id,
+            file_path,
+            original_name,
+            is_thumbnail,
+            is_active,
+            sort_order,
+            created_at,
+            updated_at
+        FROM PHOTO
+        WHERE store_id = #{store_id}
+        ORDER BY is_active DESC, is_thumbnail DESC, sort_order ASC, photo_id DESC
+    </select>
+
+    <select id="selectThumbnailByStore" resultType="com.uhi.gourmet.photo.PhotoVO">
+        SELECT
+            photo_id,
+            store_id,
+            file_path,
+            original_name,
+            is_thumbnail,
+            is_active,
+            sort_order,
+            created_at,
+            updated_at
+        FROM PHOTO
+        WHERE store_id = #{store_id}
+          AND is_active = 'Y'
+          AND is_thumbnail = 'Y'
+    </select>
+
+    <select id="selectPhotoCountByStore" resultType="int">
+        SELECT COUNT(*)
+        FROM PHOTO
+        WHERE store_id = #{store_id}
+          AND is_active = 'Y'
+    </select>
+
+    <update id="clearThumbnailByStore">
+        UPDATE PHOTO
+        SET is_thumbnail = 'N', updated_at = SYSDATE
+        WHERE store_id = #{store_id}
+          AND is_thumbnail = 'Y'
+    </update>
+
+    <update id="setThumbnail">
+        UPDATE PHOTO
+        SET is_thumbnail = 'Y', updated_at = SYSDATE
+        WHERE photo_id = #{photo_id}
+    </update>
+
+    <update id="deactivatePhoto">
+        UPDATE PHOTO
+        SET is_active = 'N', is_thumbnail = 'N', updated_at = SYSDATE
+        WHERE photo_id = #{photo_id}
+    </update>
+
+    <update id="activatePhoto">
+        UPDATE PHOTO
+        SET is_active = 'Y', updated_at = SYSDATE
+        WHERE photo_id = #{photo_id}
+    </update>
+
+    <delete id="deletePhoto">
+        DELETE FROM PHOTO
+        WHERE photo_id = #{photo_id}
+    </delete>
+
+</mapper>

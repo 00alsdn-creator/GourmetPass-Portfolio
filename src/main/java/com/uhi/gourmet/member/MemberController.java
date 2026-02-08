@@ -27,6 +27,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo; // 추가
 import com.uhi.gourmet.book.BookService;
 import com.uhi.gourmet.book.BookVO;
+import com.uhi.gourmet.favorite.FavoriteService;
+import com.uhi.gourmet.photo.PhotoService;
+import com.uhi.gourmet.photo.PhotoVO;
 import com.uhi.gourmet.wait.WaitService;
 import com.uhi.gourmet.wait.WaitVO;
 import com.uhi.gourmet.store.StoreMapper;
@@ -55,6 +58,12 @@ public class MemberController {
 
     @Autowired
     private ReviewService review_service; 
+
+    @Autowired
+    private FavoriteService favoriteService;
+
+    @Autowired
+    private PhotoService photoService;
 
     @Autowired
     private JavaMailSenderImpl mailSender;
@@ -158,9 +167,14 @@ public class MemberController {
         if (request.isUserInRole("ROLE_OWNER")) {
             StoreVO store = storeMapper.getStoreByUserId(user_id);
             if (store != null) {
+                PhotoVO thumbnail = photoService.getThumbnailByStore(store.getStore_id());
+                if (thumbnail != null) {
+                    store.setStore_img(thumbnail.getFile_path());
+                }
                 model.addAttribute("store", store);
                 model.addAttribute("menuList", storeMapper.getMenuList(store.getStore_id()));
                 model.addAttribute("store_book_list", book_service.get_store_book_list(store.getStore_id()));
+                model.addAttribute("photo_list", photoService.getPhotosByStoreAll(store.getStore_id()));
                 
                 // 점주 마이페이지는 최근 리뷰 10개 표시
                 model.addAttribute("store_review_list", review_service.getStoreReviews(store.getStore_id(), 1, 10).getList());
@@ -174,6 +188,7 @@ public class MemberController {
             
             model.addAttribute("my_review_list", reviewPage.getList());
             model.addAttribute("total_review_cnt", reviewPage.getTotal()); // UI에서 '전체보기(N)' 표시용
+            model.addAttribute("favorite_list", favoriteService.getFavoritesByUser(user_id));
             return "member/mypage"; 
         }
     }

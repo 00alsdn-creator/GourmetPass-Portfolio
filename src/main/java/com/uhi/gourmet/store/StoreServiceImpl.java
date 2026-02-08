@@ -60,6 +60,9 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public void registerStore(StoreVO vo, String userId) {
+        if (vo.getMax_capacity() < 1) {
+            throw new RuntimeException("최소인원은 1 이상이어야 합니다.");
+        }
         vo.setUser_id(userId);
         storeMapper.insertStore(vo);
     }
@@ -71,6 +74,9 @@ public class StoreServiceImpl implements StoreService {
         // [수정 포인트] ID가 0이면 수정 대상이 아니므로 예외를 던져 롤백하거나 중단합니다.
         if (vo.getStore_id() <= 0) {
             throw new RuntimeException("유효하지 않은 가게 ID입니다. (ID: 0)");
+        }
+        if (vo.getMax_capacity() < 1) {
+            throw new RuntimeException("최소인원은 1 이상이어야 합니다.");
         }
 
         StoreVO check = storeMapper.getStoreDetail(vo.getStore_id());
@@ -105,8 +111,20 @@ public class StoreServiceImpl implements StoreService {
             throw new RuntimeException("가게 정보(ID)가 누락되었습니다.");
         }
 
+        if (vo.getMenu_price() < 0) {
+            throw new RuntimeException("메뉴 가격은 0원 이상이어야 합니다.");
+        }
+
+        if (vo.getMenu_name() == null || vo.getMenu_name().trim().isEmpty()) {
+            throw new RuntimeException("메뉴 이름이 필요합니다.");
+        }
+
         StoreVO store = storeMapper.getStoreDetail(vo.getStore_id());
         if (store != null && store.getUser_id().equals(userId)) {
+            int dupCount = storeMapper.countMenuName(vo.getStore_id(), vo.getMenu_name().trim());
+            if (dupCount > 0) {
+                throw new RuntimeException("이미 등록된 메뉴 이름입니다.");
+            }
             // [추가] 빈 문자열("")이 들어올 경우 DB 제약조건 위반 방지를 위해 'N'으로 세팅
             if (vo.getMenu_sign() == null || vo.getMenu_sign().trim().isEmpty()) {
                 vo.setMenu_sign("N");

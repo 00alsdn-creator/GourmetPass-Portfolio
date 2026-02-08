@@ -49,10 +49,17 @@
 .dashboard-grid { 
     display: grid; 
     grid-template-columns: 350px 1fr; 
+    grid-template-areas:
+        "store photo"
+        "menu menu";
     gap: 30px; 
     margin-top: 30px; 
-    align-items: start; 
+    align-items: stretch; 
 }
+
+.store-info-card { grid-area: store; height: 100%; }
+.photo-manage-card { grid-area: photo; height: 100%; }
+.menu-manage-card { grid-area: menu; }
 
 /* 4. 공용 카드 디자인 */
 .dashboard-card { 
@@ -123,6 +130,209 @@
     object-fit: cover; 
     border: 2px solid #333; 
     border-radius: 10px; 
+}
+
+/* 6-1. 즐겨찾기 카드 */
+.favorite-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    max-height: 540px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.favorite-card {
+    border: 2px solid #333;
+    border-radius: 12px;
+    background: #fff;
+    color: #333;
+    display: block;
+    overflow: hidden;
+    box-shadow: 6px 6px 0px #333;
+    transition: 0.2s;
+    position: relative;
+}
+
+.favorite-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 8px 8px 0px #333;
+}
+
+.favorite-thumb {
+    width: 100%;
+    height: 180px;
+    background: #f4f4f4;
+    border-bottom: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.favorite-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.favorite-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 2px solid #333;
+    background: #fff;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px #333;
+    transition: 0.2s;
+    z-index: 2;
+}
+
+.favorite-remove:hover {
+    transform: translateY(-2px);
+}
+
+.favorite-grid::-webkit-scrollbar {
+    width: 10px;
+}
+
+.favorite-grid::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 8px;
+}
+
+.favorite-grid::-webkit-scrollbar-track {
+    background: #eee;
+    border-radius: 8px;
+}
+
+.favorite-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.favorite-info {
+    padding: 12px 14px;
+}
+
+.favorite-name {
+    font-weight: 900;
+    margin-top: 6px;
+}
+
+.favorite-meta {
+    color: #ff3d00;
+    font-weight: 800;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.favorite-count {
+    font-weight: 900;
+    color: #333;
+}
+
+.favorite-info .badge-cat {
+    display: inline-block;
+    padding: 3px 10px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    background: #fff;
+}
+
+.photo-preview {
+    border: 2px dashed #333;
+    padding: 12px;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.photo-section-title {
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.photo-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.menu-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+}
+
+.menu-card {
+    border: 2px solid #333;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 6px 6px 0px #333;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 240px;
+    width: 240px;
+}
+
+.menu-thumb {
+    height: 140px;
+    background: #f4f4f4;
+    border-bottom: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.menu-info {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.menu-title {
+    font-weight: 900;
+    font-size: 16px;
+}
+
+.menu-price {
+    font-weight: 900;
+    color: #ff3d00;
+}
+
+.menu-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: auto;
+}
+
+.btn-wire.btn-mini {
+    flex: none;
+    height: 30px;
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 28px;
+    width: auto;
+}
+
+.is-hidden {
+    display: none;
 }
 
 /* 7. 기타 공용 컴포넌트 */

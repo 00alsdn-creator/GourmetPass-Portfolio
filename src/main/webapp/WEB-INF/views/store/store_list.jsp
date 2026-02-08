@@ -55,7 +55,7 @@
         <c:choose>
             <c:when test="${not empty storeList}">
                 <c:forEach var="store" items="${storeList}">
-                    <div class="store-card" onclick="location.href='${pageContext.request.contextPath}/store/detail?storeId=${store.store_id}'">
+                    <div class="store-card" data-store-id="${store.store_id}" onclick="location.href='${pageContext.request.contextPath}/store/detail?storeId=${store.store_id}'">
                         <div class="store-img-box">
                             <c:choose>
                                 <c:when test="${not empty store.store_img}">
@@ -65,6 +65,7 @@
                                     <div class="no-img-placeholder">NO IMAGE</div>
                                  </c:otherwise>
                             </c:choose>
+                            <button type="button" class="favorite-toggle" data-store-id="${store.store_id}">🤍</button>
                         </div>
                         <div class="store-info">
                             <span class="badge-cat">${store.store_category}</span>

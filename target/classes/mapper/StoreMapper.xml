@@ -18,130 +18,141 @@
     </sql>
 
     <select id="getListStore" resultType="com.uhi.gourmet.store.StoreVO">
-        SELECT 
-            s.*,
-            (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id) as review_cnt,
-            (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
+        SELECT
+        s.*,
+        (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id) as review_cnt,
+        (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
         FROM STORE s
         WHERE 1=1
-        <include refid="criteria" />
+        <include refid="criteria"/>
         ORDER BY s.store_id DESC
     </select>
 
     <select id="getTotalCount" resultType="int">
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
         FROM STORE s
         WHERE 1=1
-        <include refid="criteria" />
+        <include refid="criteria"/>
     </select>
 
     <select id="selectPopularStore" resultType="com.uhi.gourmet.store.StoreVO">
-        SELECT * FROM (
-            SELECT 
-                s.*,
-                (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id) as review_cnt,
-                (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
-            FROM STORE s
-            ORDER BY s.store_cnt DESC
-        )
+        SELECT *
+        FROM (SELECT s.*,
+                     (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id)                      as review_cnt,
+                     (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
+              FROM STORE s
+              ORDER BY s.store_cnt DESC)
         WHERE ROWNUM &lt;= 6
     </select>
 
     <select id="getStoreDetail" parameterType="int" resultType="com.uhi.gourmet.store.StoreVO">
-        SELECT
-            s.*,
-            (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id) as review_cnt,
-            (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
+        SELECT s.*,
+               (SELECT COUNT(*) FROM REVIEW r WHERE r.store_id = s.store_id)                      as review_cnt,
+               (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
         FROM STORE s
         WHERE s.store_id = #{store_id}
     </select>
 
     <insert id="insertStore" parameterType="com.uhi.gourmet.store.StoreVO">
-        INSERT INTO STORE (
-            store_id, user_id, store_name,
-            store_tel, store_zip,
-            store_addr1, store_addr2, store_lat, store_lon,
-            store_category, store_desc, open_time, close_time,
-            res_unit, store_img,
-            store_cnt
-        ) VALUES (
-            SEQ_STORE.NEXTVAL,
-            #{user_id, jdbcType=VARCHAR},
-            #{store_name, jdbcType=VARCHAR},
-            #{store_tel, jdbcType=VARCHAR},
-            #{store_zip, jdbcType=VARCHAR},
-            #{store_addr1, jdbcType=VARCHAR},
-            #{store_addr2, jdbcType=VARCHAR},
-            #{store_lat, jdbcType=NUMERIC},
-            #{store_lon, jdbcType=NUMERIC},
-            #{store_category, jdbcType=VARCHAR},
-            #{store_desc, jdbcType=CLOB},
-            #{open_time, jdbcType=VARCHAR},
-            #{close_time, jdbcType=VARCHAR},
-            #{res_unit, jdbcType=INTEGER},
-            #{store_img, jdbcType=VARCHAR},
-            0
-        )
+        INSERT INTO STORE (store_id, user_id, store_name,
+                           store_tel, store_zip,
+                           store_addr1, store_addr2, store_lat, store_lon,
+                           store_category, store_desc, open_time, close_time,
+                           res_unit, store_img,
+                           store_cnt, max_capacity)
+        VALUES (SEQ_STORE.NEXTVAL,
+                #{user_id, jdbcType=VARCHAR},
+                #{store_name, jdbcType=VARCHAR},
+                #{store_tel, jdbcType=VARCHAR},
+                #{store_zip, jdbcType=VARCHAR},
+                #{store_addr1, jdbcType=VARCHAR},
+                #{store_addr2, jdbcType=VARCHAR},
+                #{store_lat, jdbcType=NUMERIC},
+                #{store_lon, jdbcType=NUMERIC},
+                #{store_category, jdbcType=VARCHAR},
+                #{store_desc, jdbcType=CLOB},
+                #{open_time, jdbcType=VARCHAR},
+                #{close_time, jdbcType=VARCHAR},
+                #{res_unit, jdbcType=INTEGER},
+                #{store_img, jdbcType=VARCHAR},
+                0,
+                #{max_capacity, jdbcType=NUMERIC})
     </insert>
 
     <select id="getStoreByUserId" parameterType="string" resultType="com.uhi.gourmet.store.StoreVO">
-        SELECT * FROM STORE WHERE user_id = #{user_id}
+        SELECT *
+        FROM STORE
+        WHERE user_id = #{user_id}
     </select>
 
     <select id="getMenuList" parameterType="int" resultType="com.uhi.gourmet.store.MenuVO">
-        SELECT * FROM MENU WHERE store_id = #{store_id} ORDER BY menu_id ASC
+        SELECT *
+        FROM MENU
+        WHERE store_id = #{store_id}
+        ORDER BY menu_id ASC
     </select>
 
     <update id="updateViewCount" parameterType="int">
-        UPDATE STORE SET store_cnt = store_cnt + 1 WHERE store_id = #{store_id}
+        UPDATE STORE
+        SET store_cnt = store_cnt + 1
+        WHERE store_id = #{store_id}
     </update>
 
     <update id="updateStore" parameterType="com.uhi.gourmet.store.StoreVO">
         UPDATE STORE
-        SET store_name = #{store_name, jdbcType=VARCHAR},
+        SET store_name     = #{store_name, jdbcType=VARCHAR},
             store_category = #{store_category, jdbcType=VARCHAR},
-            store_tel = #{store_tel, jdbcType=VARCHAR},
-            store_addr1 = #{store_addr1, jdbcType=VARCHAR},
-            store_addr2 = #{store_addr2, jdbcType=VARCHAR},
-            store_zip = #{store_zip, jdbcType=VARCHAR},
-            store_lat = #{store_lat, jdbcType=NUMERIC},
-            store_lon = #{store_lon, jdbcType=NUMERIC},
-            open_time = #{open_time, jdbcType=VARCHAR},
-            close_time = #{close_time, jdbcType=VARCHAR},
-            res_unit = #{res_unit, jdbcType=INTEGER},
-            store_desc = #{store_desc, jdbcType=CLOB},
-            store_img = #{store_img, jdbcType=VARCHAR}
+            store_tel      = #{store_tel, jdbcType=VARCHAR},
+            store_addr1    = #{store_addr1, jdbcType=VARCHAR},
+            store_addr2    = #{store_addr2, jdbcType=VARCHAR},
+            store_zip      = #{store_zip, jdbcType=VARCHAR},
+            store_lat      = #{store_lat, jdbcType=NUMERIC},
+            store_lon      = #{store_lon, jdbcType=NUMERIC},
+            open_time      = #{open_time, jdbcType=VARCHAR},
+            close_time     = #{close_time, jdbcType=VARCHAR},
+            res_unit       = #{res_unit, jdbcType=INTEGER},
+            store_desc     = #{store_desc, jdbcType=CLOB},
+            store_img      = #{store_img, jdbcType=VARCHAR},
+            max_capacity   = #{max_capacity, jdbcType=NUMERIC}
         WHERE store_id = #{store_id}
     </update>
 
     <insert id="insertMenu" parameterType="com.uhi.gourmet.store.MenuVO">
-        INSERT INTO MENU (
-            menu_id, store_id, menu_name,
-            menu_price, menu_img, menu_sign
-        ) VALUES (
-            SEQ_MENU.NEXTVAL,
-            #{store_id, jdbcType=NUMERIC},
-            #{keyword, jdbcType=VARCHAR}, #{menu_price, jdbcType=NUMERIC},
-            #{menu_img, jdbcType=VARCHAR},
-            #{menu_sign, jdbcType=VARCHAR}
-        )
+        INSERT INTO MENU (menu_id, store_id, menu_name,
+                          menu_price, menu_img, menu_sign)
+        VALUES (SEQ_MENU.NEXTVAL,
+                #{store_id, jdbcType=NUMERIC},
+                #{menu_name, jdbcType=VARCHAR}, #{menu_price, jdbcType=NUMERIC},
+                #{menu_img, jdbcType=VARCHAR},
+                #{menu_sign, jdbcType=VARCHAR})
     </insert>
 
+    <select id="countMenuName" resultType="int">
+        SELECT COUNT(*)
+        FROM MENU
+        WHERE store_id = #{store_id}
+          AND UPPER(menu_name) = UPPER(#{menu_name})
+    </select>
+
     <delete id="deleteMenu" parameterType="int">
-        DELETE FROM MENU WHERE menu_id = #{menu_id}
+        DELETE
+        FROM MENU
+        WHERE menu_id = #{menu_id}
     </delete>
 
     <update id="updateMenu" parameterType="com.uhi.gourmet.store.MenuVO">
         UPDATE MENU
-        SET menu_name = #{menu_name, jdbcType=VARCHAR},
+        SET menu_name  = #{menu_name, jdbcType=VARCHAR},
             menu_price = #{menu_price, jdbcType=NUMERIC},
-            menu_img = #{menu_img, jdbcType=VARCHAR},
-            menu_sign = #{menu_sign, jdbcType=VARCHAR}
+            menu_img   = #{menu_img, jdbcType=VARCHAR},
+            menu_sign  = #{menu_sign, jdbcType=VARCHAR}
         WHERE menu_id = #{menu_id, jdbcType=NUMERIC}
     </update>
 
     <select id="getMenuDetail" parameterType="int" resultType="com.uhi.gourmet.store.MenuVO">
-        SELECT * FROM MENU WHERE menu_id = #{menu_id}
+        SELECT *
+        FROM MENU
+        WHERE menu_id = #{menu_id}
     </select>
 
     <select id="getBookedTimes" resultType="string">
@@ -149,6 +160,6 @@
         FROM BOOK
         WHERE store_id = #{store_id}
           AND TO_CHAR(book_date, 'YYYY-MM-DD') = #{book_date}
-        AND book_status NOT IN ('CANCELED', 'NOSHOW')
+          AND book_status NOT IN ('CANCELED', 'NOSHOW')
     </select>
 </mapper>
