@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uhi.gourmet.favorite.FavoriteMapper">
+
+    <select id="selectFavoriteCount" resultType="int">
+        SELECT COUNT(*)
+        FROM FAVORITE
+        WHERE user_id = #{user_id}
+          AND store_id = #{store_id}
+    </select>
+
+    <select id="selectFavoriteCountByStore" resultType="int">
+        SELECT COUNT(*)
+        FROM FAVORITE
+        WHERE store_id = #{store_id}
+    </select>
+
+    <insert id="insertFavorite">
+        INSERT INTO FAVORITE (
+            favorite_id, user_id, store_id, created_at
+        ) VALUES (
+            SEQ_FAVORITE.NEXTVAL,
+            #{user_id, jdbcType=VARCHAR},
+            #{store_id, jdbcType=INTEGER},
+            SYSDATE
+        )
+    </insert>
+
+    <delete id="deleteFavorite">
+        DELETE FROM FAVORITE
+        WHERE user_id = #{user_id}
+          AND store_id = #{store_id}
+    </delete>
+
+    <select id="selectFavoritesByUser" resultType="com.uhi.gourmet.favorite.FavoriteVO">
+        SELECT
+            f.favorite_id,
+            f.user_id,
+            f.store_id,
+            f.created_at,
+            s.store_name,
+            s.store_img,
+            s.store_category,
+            (SELECT NVL(ROUND(AVG(rating), 1), 0) FROM REVIEW r WHERE r.store_id = s.store_id) as avg_rating
+        FROM FAVORITE f
+        JOIN STORE s ON f.store_id = s.store_id
+        WHERE f.user_id = #{user_id}
+        ORDER BY f.favorite_id DESC
+    </select>
+
+</mapper>
